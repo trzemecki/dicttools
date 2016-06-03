@@ -9,5 +9,7 @@ setup(
     author='Leszek Trzemecki',
     author_email='leszek.trzemecki@gmail.com',
     description='Additional dictionary functions for python.',
-    requires=['mock'],
+    install_requires=[
+        'mock'
+    ],
 )
