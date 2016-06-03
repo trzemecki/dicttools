@@ -10,5 +10,4 @@ setup(
     author_email='leszek.trzemecki@gmail.com',
     description='Additional dictionary functions for python.',
     requires=['mock'],
-    test_suite='tests'
 )
