@@ -5,9 +5,12 @@ This module contains functions, witch operate on dict or create new one
 but do not modify already existed values.
 """
 
-import functools
+import bisect
 import collections
+import functools
 import operator
+
+import six
 
 __author__ = 'Leszek Trzemecki'
 
@@ -164,3 +167,141 @@ def contains(sub, super):
     return all(
         key in super and sub[key] == super[key] for key, value in sub.items()
     )
+
+
+class FrozenDict(object):
+    """
+    Object represents pairs key-value, and works like dict, but cannot be
+    modified. Also is hashable  in contrast to builtin dict.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Init is analogical as dict:
+
+        To create empty frozen dictionary
+        >>> FrozenDict()
+        -> ${'x': 4.5, 'y': 3}
+
+        To create frozen dict from mapping
+        >>> FrozenDict({'x': 4.5, 'y': 3})
+        -> ${'x': 4.5, 'y': 3}
+
+        To create frozen dict from iterable (of 2-tuple pairs of key and value)
+        >>> FrozenDict((('x', 4.5), ('y', 3)))
+        -> ${'x': 4.5, 'y': 3}
+
+        Using kwargs
+        >>> FrozenDict(x=4.5, y=3)
+        -> ${'x': 4.5, 'y': 3}
+
+        Using kwargs with other method
+        >>> FrozenDict({'x': 4.5}, y=3)
+        -> ${'x': 4.5, 'y': 3}
+        """
+
+        content = dict(*args, **kwargs)
+
+        self._keys = tuple(sorted(content))
+        self._values = tuple(content[key] for key in self._keys)
+
+    def has_key(self, key):
+        """
+        Search key in contained keys and return True if founded, otherwise Fasle.
+
+        :param key: key which is looked for
+        :return: True if key is contained, otherwise False
+        """
+        return key in self
+
+    def __contains__(self, item):
+        index = bisect.bisect_left(self._keys, item)
+
+        return self._is_found(item, index)
+
+    def _is_found(self, item, index):
+        return 0 <= index < len(self._keys) and self._keys[index] == item
+
+    def get(self, key, default=None):
+        """
+        Return value for given key if founded, otherwise return defalut value or None
+        if default not given.
+
+        :param key: key, for which value should be obtained
+        :param default: value, returned when key not found
+        :return: value for given key or default
+        """
+        return self[key] if key in self else default
+
+    def __getitem__(self, item):
+        index = bisect.bisect_left(self._keys, item)
+
+        if not self._is_found(item, index):
+            raise KeyError(item)
+
+        return self._values[index]
+
+    def __iter__(self):
+        return iter(self._keys)
+
+    def items(self):
+        """
+        :return: iterable pairs (key, value)
+        """
+        return six.moves.zip(self._keys, self._values)
+
+    def keys(self):
+        return self._keys
+
+    def values(self):
+        return self._values
+
+    def __len__(self):
+        return len(self._keys)
+
+    def __eq__(self, other):
+        if isinstance(other, dict):
+            return self == FrozenDict(other)
+
+        return isinstance(other, FrozenDict) and self._values == other._values and self._keys == other._keys
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __hash__(self):
+        return 13 * hash(self._values) + hash(self._keys)
+
+    def __str__(self):
+        return "${%s}" % self._str_content()
+
+    def __repr__(self):
+        return "FrozenDict({%s})" % self._str_content()
+
+    def _str_content(self):
+        return ', '.join('%s: %s' % (repr(key), repr(value)) for key, value in self.items())
+
+    def copy(self):
+        return FrozenDict(self)
+
+    if six.PY2:
+        iteritems = items
+        viewkeys = keys
+        viewvalues = values
+
+        def items(self):
+            return list(self.iteritems())
+
+        def keys(self):
+            return list(self._keys)
+
+        def values(self):
+            return list(self._values)
+
+        def viewitems(self):
+            return tuple(self.iteritems())
+
+        def iterkeys(self):
+            return iter(self._keys)
+
+        def itervalues(self):
+            return iter(self._values)
