@@ -183,6 +183,14 @@ def contains(sub, super):
     )
 
 
+def map_values(function, dictionary):
+    return {key: function(value) for key, value in dictionary.items()}
+
+
+def map_keys(function, dictionary):
+    return {function(key): value for key, value in dictionary.items()}
+
+
 class FrozenDict(object):
     """
     Object represents pairs key-value, and works like dict, but cannot be

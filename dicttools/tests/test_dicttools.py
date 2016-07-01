@@ -143,6 +143,20 @@ class DictToolsTests(unittest.TestCase):
 
         self.assertEqual({'a': 1, 'c':4}, result)
 
+    def test_MapValues_Always_ReturnValuesWithTheSameKeysAndMappedValues(self):
+        source = {'a': 1, 'b': 2, 'c': 4}
+
+        result = dicttools.map_values(lambda v: v + 1, source)
+
+        self.assertEqual({'a': 2, 'b': 3, 'c': 5}, result)
+
+    def test_MapKeys_Always_ReturnValuesWithMappedKeysAndTheSameValues(self):
+        source = {'h': 1, 'a': 2, 'l': 3}
+
+        result = dicttools.map_keys(lambda v: chr(ord(v) + 1), source)
+
+        self.assertEqual({'i': 1, 'b': 2, 'm': 3}, result)
+
 
 class FrozenDictTests(unittest.TestCase):
     def test_Init_CreateEmptyFrozenDict_LengthIs0(self):
