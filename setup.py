@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='dicttools',
-    version='1.1.0',
+    version='1.1.1',
     packages=['dicttools', 'dicttools.tests'],
     url='https://github.com/trzemecki/dicttools',
     license='Apache 2.0',

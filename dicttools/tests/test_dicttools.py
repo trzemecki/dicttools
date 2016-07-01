@@ -121,6 +121,42 @@ class DictToolsTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             value = result['3']
 
+    def test_Extract_KeyNotGiven_ReturnDictWithAttributes(self):
+        source = mock.Mock(first=1, second=2, third=3)
+
+        result = dicttools.extract(source, 'first', 'second')
+
+        self.assertEqual({'first': 1, 'second': 2}, result)
+
+    def test_Extract_KeyGiven_UseKeyToExtract(self):
+        def caesar(source, item):
+            return getattr(source, chr(ord(item) + 1))
+
+        result = dicttools.extract(mock.Mock(i=2, b=3, m=4), 'h', 'a', 'l', key=caesar)
+
+        self.assertEqual({'h': 2, 'a': 3, 'l': 4}, result)
+
+    def test_Select_Always_GetFromDictGivenItems(self):
+        source = {'a': 1, 'b': 2, 'c':4}
+
+        result = dicttools.select(source, 'a', 'c')
+
+        self.assertEqual({'a': 1, 'c':4}, result)
+
+    def test_MapValues_Always_ReturnValuesWithTheSameKeysAndMappedValues(self):
+        source = {'a': 1, 'b': 2, 'c': 4}
+
+        result = dicttools.map_values(lambda v: v + 1, source)
+
+        self.assertEqual({'a': 2, 'b': 3, 'c': 5}, result)
+
+    def test_MapKeys_Always_ReturnValuesWithMappedKeysAndTheSameValues(self):
+        source = {'h': 1, 'a': 2, 'l': 3}
+
+        result = dicttools.map_keys(lambda v: chr(ord(v) + 1), source)
+
+        self.assertEqual({'i': 1, 'b': 2, 'm': 3}, result)
+
 
 class FrozenDictTests(unittest.TestCase):
     def test_Init_CreateEmptyFrozenDict_LengthIs0(self):
