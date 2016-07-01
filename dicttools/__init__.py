@@ -76,17 +76,31 @@ def group_by(key, elements):
     return dict(result)
 
 
-def extract(source, *values):
+def select(source, *values):
+    """
+    Select from mapping given values and put into new created dict.
+
+    :param source: mapping, from which values are selected
+    :param values: values which should be selected
+    :return: dict with selected values
+    """
+    return extract(source, *values, key=operator.getitem)
+
+
+def extract(source, *values, **kwargs):
     """
     Create dict with attributes name and associated value extracted from object,
     by keys given as parameter.
 
     :param source: object to extract
     :param values: values which should be extracted
+    :param key: two arguments function, which extract required argument (default getattr)
     :return: dict with extracted values
     """
 
-    return {value: getattr(source, value) for value in values}
+    extractor = kwargs.get('key', getattr)
+
+    return {value: extractor(source, value) for value in values}
 
 
 def merge(*dicts):
