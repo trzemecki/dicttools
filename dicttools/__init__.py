@@ -221,27 +221,27 @@ class FrozenDict(collections.Mapping):
         To create empty frozen dictionary::
 
             >>> FrozenDict()
-            -> ${'x': 4.5, 'y': 3}
+            ${'x': 4.5, 'y': 3}
 
         To create frozen dict from mapping::
 
             >>> FrozenDict({'x': 4.5, 'y': 3})
-            -> ${'x': 4.5, 'y': 3}
+            ${'x': 4.5, 'y': 3}
 
         To create frozen dict from iterable (of 2-tuple pairs of key and value)::
 
             >>> FrozenDict((('x', 4.5), ('y', 3)))
-            -> ${'x': 4.5, 'y': 3}
+            ${'x': 4.5, 'y': 3}
 
         Using kwargs::
 
             >>> FrozenDict(x=4.5, y=3)
-            -> ${'x': 4.5, 'y': 3}
+            ${'x': 4.5, 'y': 3}
 
         Using kwargs with other method::
 
             >>> FrozenDict({'x': 4.5}, y=3)
-            -> ${'x': 4.5, 'y': 3}
+            ${'x': 4.5, 'y': 3}
         """
 
         if not kwargs and len(args) == 1 and isinstance(args[0], collections.Mapping):
