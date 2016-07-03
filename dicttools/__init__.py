@@ -221,7 +221,10 @@ class FrozenDict(collections.Mapping):
         -> ${'x': 4.5, 'y': 3}
         """
 
-        content = dict(*args, **kwargs)
+        if not kwargs and len(args) == 1 and isinstance(args[0], collections.Mapping):
+            content = args[0]
+        else:
+            content = dict(*args, **kwargs)
 
         self._keys = tuple(sorted(content))
         self._values = tuple(content[key] for key in self._keys)
