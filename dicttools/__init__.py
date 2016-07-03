@@ -183,10 +183,24 @@ def contains(sub, super):
 
 
 def map_values(function, dictionary):
+    """
+    Map each value using given function, and return new dict with changed values.
+
+    :param function: keys map function
+    :param dictionary: dictionary to mapping
+    :return: dict with changed values
+    """
     return {key: function(value) for key, value in dictionary.items()}
 
 
 def map_keys(function, dictionary):
+    """
+    Map each key using given function, and return new dict with changed keys.
+
+    :param function: values map function
+    :param dictionary: dictionary to mapping
+    :return: dict with changed (mapped) keys
+    """
     return {function(key): value for key, value in dictionary.items()}
 
 
