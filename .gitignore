@@ -63,3 +63,9 @@ target/
 
 # Pycharm files
 .idea/*
+
+#documentation
+doc/build
+
+#self
+.gitignore

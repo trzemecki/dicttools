@@ -17,9 +17,10 @@ __author__ = 'Leszek Trzemecki'
 def two_way(dictionary):
     """
     Create new dict contains two way associated (values to keys and keys to values)
-    items from given dict, for example:
-    >>> two_way({'A': 1, 'B': 2})
-    {'A': 1, 1: 'A', 2: 'B', 'B': 2}
+    items from given dict, for example::
+
+        >>> two_way({'A': 1, 'B': 2})
+        {'A': 1, 1: 'A', 2: 'B', 'B': 2}
 
     :param dict dictionary: one way association dict
     :return: two way association dict
@@ -120,18 +121,21 @@ def merge(*dicts):
 
 def split(elements, *conditions, **kwargs):
     """
-    Split elements to other sets of elements according to given conditions, for example:
-    >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%2 == 0))
-    [{0: 'A', 2: 'C', 4: 'E'}, {1: 'B', 3: 'D'}]
+    Split elements to other sets of elements according to given conditions, for example::
 
-    When the elements which are not follow any given condition should be omitted set rest attribute to False:
-    >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%2 == 0), rest=False)
-    [{0: 'A', 2: 'C', 4: 'E'}]
+        >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%2 == 0))
+        [{0: 'A', 2: 'C', 4: 'E'}, {1: 'B', 3: 'D'}]
+
+    When the elements which are not follow any given condition should be omitted set rest attribute to False::
+
+        >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%2 == 0), rest=False)
+        [{0: 'A', 2: 'C', 4: 'E'}]
 
     When more than one condition is given element was included in first dictionary, which for condition
-    was fulfilled
-    >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%3 == 0, lambda i: i%2 == 0))
-    [{0: 'A', 3: 'D'}, {2: 'C', 4: 'E'}, {1: 'B'}]
+    was fulfilled::
+
+        >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%3 == 0, lambda i: i%2 == 0))
+        [{0: 'A', 3: 'D'}, {2: 'C', 4: 'E'}, {1: 'B'}]
 
     :param elements: elements to split into other sets of elements
     :param conditions: lambdas (key -> bool) to decide to include or not element in current result
@@ -214,25 +218,30 @@ class FrozenDict(collections.Mapping):
         """
         Init is analogical as dict:
 
-        To create empty frozen dictionary
-        >>> FrozenDict()
-        -> ${'x': 4.5, 'y': 3}
+        To create empty frozen dictionary::
 
-        To create frozen dict from mapping
-        >>> FrozenDict({'x': 4.5, 'y': 3})
-        -> ${'x': 4.5, 'y': 3}
+            >>> FrozenDict()
+            ${'x': 4.5, 'y': 3}
 
-        To create frozen dict from iterable (of 2-tuple pairs of key and value)
-        >>> FrozenDict((('x', 4.5), ('y', 3)))
-        -> ${'x': 4.5, 'y': 3}
+        To create frozen dict from mapping::
 
-        Using kwargs
-        >>> FrozenDict(x=4.5, y=3)
-        -> ${'x': 4.5, 'y': 3}
+            >>> FrozenDict({'x': 4.5, 'y': 3})
+            ${'x': 4.5, 'y': 3}
 
-        Using kwargs with other method
-        >>> FrozenDict({'x': 4.5}, y=3)
-        -> ${'x': 4.5, 'y': 3}
+        To create frozen dict from iterable (of 2-tuple pairs of key and value)::
+
+            >>> FrozenDict((('x', 4.5), ('y', 3)))
+            ${'x': 4.5, 'y': 3}
+
+        Using kwargs::
+
+            >>> FrozenDict(x=4.5, y=3)
+            ${'x': 4.5, 'y': 3}
+
+        Using kwargs with other method::
+
+            >>> FrozenDict({'x': 4.5}, y=3)
+            ${'x': 4.5, 'y': 3}
         """
 
         if not kwargs and len(args) == 1 and isinstance(args[0], collections.Mapping):
