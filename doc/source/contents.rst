@@ -7,8 +7,6 @@ Version 1.1
 
 Copyright |copy| 2016 by Leszek Trzemecki
 
-*Additional dictionary functions for python.*
-
 Dicttools is open-source, Apache 2 licenced library with additional dict functions and classes.
 
 Installation
@@ -22,11 +20,11 @@ Installation
 It it also possible to install it by cloning repository with zip on desktop, unpack it and then run setup.py,
 but is more complicated than the way by using pip, so it will not be described.
 
-Documentation
--------------
+Contents
+--------
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 1
 
     functions
     classes
