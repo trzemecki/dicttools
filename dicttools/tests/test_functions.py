@@ -10,6 +10,22 @@ def is_even(i):
 
 
 class DictToolsTests(unittest.TestCase):
+    def test_Merge_3DictsGiven_ReturnDictContainingEachElementFromGivenDicts(self):
+        result = dicttools.merge({'A': 1}, {'B': 2}, {'C': 3})
+
+        expected = {'A': 1, 'B': 2, 'C': 3}
+        self.assertEqual(expected, result)
+
+    def test_Merge_ByDefault_ReturnEmptyDict(self):
+        result = dicttools.merge()
+
+        self.assertEqual({}, result)
+
+    def test_Merge_KeyRepeats_ReturnDictWithValueFromLast(self):
+        result = dicttools.merge({'A': 1, 'X': 8}, {'B': 2, 'X': 14}, {'C': 3, 'X': 12})
+
+        self.assertEqual(12, result['X'])
+
     def test_ByKey_Always_ReturnDictWithValuesAssignedToExtractedKey(self):
         values = (mock.Mock(id=3), mock.Mock(id=6))
 
