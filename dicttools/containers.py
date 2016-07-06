@@ -15,7 +15,7 @@ class FrozenDict(collections.Mapping):
         To create empty frozen dictionary::
 
             >>> FrozenDict()
-            ${'x': 4.5, 'y': 3}
+            ${}
 
         To create frozen dict from mapping::
 
