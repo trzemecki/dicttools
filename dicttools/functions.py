@@ -21,7 +21,10 @@ def two_way(dictionary):
 
 def swap(dictionary):
     """
-    Create new dict with given dictionary keys as values and values as keys.
+    Create new dict with given dictionary keys as values and values as keys::
+
+        >>> swap({0: 'A', 1: 'B', 2: 'C'})
+        {'A': 0, 'B': 1, 'C': 2}
 
     :param dict dictionary: dict to swap
     :return: new swapped dict
@@ -30,25 +33,35 @@ def swap(dictionary):
     return {value: key for key, value in dictionary.items()}
 
 
-def by(key, elements):
+def by(key, *elements):
     """
     Create dict contained elements, which could be accessed by
-    extracted key, as given as parameter.
+    extracted key, as given as parameter::
 
-    :param elements: list or tuple of elements
+        >>> by('real', (1+2j), (2-3j),(-5+0j))
+        {1.0: (1+2j), 2.0: (2-3j), -5.0: (-5+0j)}
+
+        >>> by('real', [(1+2j), (2-3j),(-5+0j)])
+        {1.0: (1+2j), 2.0: (2-3j), -5.0: (-5+0j)}
+
+
+    :param elements: iterable of elements or elements as varargs
     :param key: attribute, by which element could be accessed or lambda function
     :return: dict with elements, assigned to extracted key
     """
     if not callable(key):
         key = operator.attrgetter(key)
 
-    return {key(element): element for element in elements}
+    return {key(element): element for element in _iter_all_or_first(elements)}
 
 
-def group_by(key, elements):
+def group_by(key, *elements):
     """
     Create dict contained elements, grouped by given key.
-    Return dict of list of values, with the same extracted key assigned to this key.
+    Return dict of list of values, with the same extracted key assigned to this key::
+
+        >>> group_by('real', 2j, -3j, (-5+0j), (-3+2j), (-5+15j))
+        {0.0: [2j, -3j], -5.0: [(-5+0j), (-5+15j)], -3.0: [(-3+2j)]}
 
     :param elements: list or tuple of elements
     :param key: attribute, by which element could be accessed or lambda function
@@ -60,43 +73,58 @@ def group_by(key, elements):
 
     result = collections.defaultdict(list)
 
-    for each in elements:
+    for each in _iter_all_or_first(elements):
         result[key(each)].append(each)
 
     return dict(result)
 
 
-def select(source, *values):
+def select(source, *elements):
     """
-    Select from mapping given values and put into new created dict.
+    Select from mapping given values and put into new created dict::
+
+        >>> select({'a': 1, 'b': 2, 'c':4}, 'a', 'c')
+        {'a': 1, 'c': 4}
 
     :param source: mapping, from which values are selected
-    :param values: values which should be selected
+    :param elements: values which should be selected
     :return: dict with selected values
     """
-    return extract(source, *values, key=operator.getitem)
+    return extract(source, *elements, key=operator.getitem)
 
 
-def extract(source, *values, **kwargs):
+def extract(source, *elements, **kwargs):
     """
     Create dict with attributes name and associated value extracted from object,
     by keys given as parameter.
 
     :param source: object to extract
-    :param values: values which should be extracted
+    :param elements: values which should be extracted
     :param key: two arguments function, which extract required argument (default getattr)
     :return: dict with extracted values
     """
 
     extractor = kwargs.get('key', getattr)
 
-    return {value: extractor(source, value) for value in values}
+    return {value: extractor(source, value) for value in _iter_all_or_first(elements)}
+
+
+def _iter_all_or_first(elements):
+    if len(elements) > 1:
+        return iter(elements)
+    elif isinstance(elements[0], collections.Iterable):
+        return iter(elements[0])
+    else:
+        return iter([elements[0]])
 
 
 def merge(*dicts):
     """
     Merge dicts into single dict. If keys are duplicated, value is taken from last dict,
-    which contains this key.
+    which contains this key::
+
+        >>> merge({'A': 1}, {'B': 2}, {'C': 3})
+        {'A': 1, 'B': 2, 'C': 3}
 
     :param dicts: dicts to merge
     :return: dict contained all element from given dicts

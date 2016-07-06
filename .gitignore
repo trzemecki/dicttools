@@ -69,3 +69,6 @@ doc/build
 
 #self
 .gitignore
+
+#env
+_virtualenv_
