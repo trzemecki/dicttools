@@ -53,17 +53,33 @@ class DictToolsTests(unittest.TestCase):
         elements = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}
 
         result = dicttools.sift(elements, is_even)
-        expected = {0: 'A', 2: 'C', 4: 'E'}
 
+        expected = {0: 'A', 2: 'C', 4: 'E'}
         self.assertEqual(expected, result)
 
     def test_Sift_SiftNotNoneValues_ResultShouldContainElementsWithNotNoneValues(self):
         elements = {0: None, 1: 'B', 2: None, 3: 'D', 4: 'E'}
 
         result = dicttools.sift(elements, lambda k, v: v is not None)
-        expected = {1: 'B', 3: 'D', 4: 'E'}
 
+        expected = {1: 'B', 3: 'D', 4: 'E'}
         self.assertEqual(expected, result)
+
+    def test_SiftUpdate_SiftEventKey_ResultShouldContainOnlyEvenElements(self):
+        elements = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}
+
+        dicttools.sift_update(elements, is_even)
+
+        expected = {0: 'A', 2: 'C', 4: 'E'}
+        self.assertEqual(expected, elements)
+
+    def test_SiftUpdate_SiftNotNoneValues_ResultShouldContainElementsWithNotNoneValues(self):
+        elements = {0: None, 1: 'B', 2: None, 3: 'D', 4: 'E'}
+
+        dicttools.sift_update(elements, lambda k, v: v is not None)
+
+        expected = {1: 'B', 3: 'D', 4: 'E'}
+        self.assertEqual(expected, elements)
 
     def test_Split_SplitByNoneOrNoneValues_ResultShouldContainElementsWithNotNoneValues(self):
         elements = {0: None, 1: 'B', 2: None, 3: 'D', 4: 'E'}

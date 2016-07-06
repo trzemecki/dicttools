@@ -10,7 +10,9 @@ Module functions
 .. autofunction:: dicttools.extract
 .. autofunction:: dicttools.merge
 .. autofunction:: dicttools.split
+.. _sift:
 .. autofunction:: dicttools.sift
+.. autofunction:: dicttools.sift_update
 .. autofunction:: dicttools.contains
 .. autofunction:: dicttools.map_values
 .. autofunction:: dicttools.map_keys

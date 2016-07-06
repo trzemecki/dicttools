@@ -137,7 +137,7 @@ def merge(*dicts):
     return functools.reduce(update, dicts, dict())
 
 
-def split(elements, *conditions, **kwargs):
+def split(dictionary, *conditions, **kwargs):
     """
     Split elements to other sets of elements according to given conditions, for example::
 
@@ -155,7 +155,7 @@ def split(elements, *conditions, **kwargs):
         >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%3 == 0, lambda i: i%2 == 0))
         [{0: 'A', 3: 'D'}, {2: 'C', 4: 'E'}, {1: 'B'}]
 
-    :param elements: elements to split into other sets of elements
+    :param dictionary: elements to split into other sets of elements
     :param conditions: functions (name matters): key -> bool or  value -> bool or key, value -> bool)
         which decide that element in current result should be included or not
     :param rest: True if should append at end elements which not fulfilled any condition, False otherwise
@@ -165,18 +165,18 @@ def split(elements, *conditions, **kwargs):
     rest = kwargs.get('rest', True)
 
     for condition in conditions:
-        selected, elements = _split_two(elements, condition)
+        selected, dictionary = _split_two(dictionary, condition)
         yield selected
     if rest:
-        yield elements
+        yield dictionary
 
 
-def _split_two(elements, condition):
+def _split_two(dictionary, condition):
     selector = _selector(condition)
 
     yes, no = {}, {}
 
-    for key, value in elements.items():
+    for key, value in dictionary.items():
         if selector(key, value):
             yes[key] = value
         else:
@@ -185,11 +185,11 @@ def _split_two(elements, condition):
     return yes, no
 
 
-def sift(elements, condition, opposite=False):
+def sift(dictionary, condition, opposite=False):
     """
     Select elements from dictionary, which fulfilled given condition
 
-    :param elements: set of elements for select subset
+    :param dictionary: set of elements to select subset
     :param condition: function (name matters): key -> bool or  value -> bool or key, value -> bool)
         selected remain elements
     :param opposite: if True replace "condition" by "not condition" (default False)
@@ -198,7 +198,25 @@ def sift(elements, condition, opposite=False):
 
     selector = _selector(condition)
 
-    return {key: value for key, value in elements.items() if bool(opposite) != bool(selector(key, value))}
+    return {key: value for key, value in dictionary.items() if bool(opposite) != bool(selector(key, value))}
+
+
+def sift_update(dictionary, condition, opposite=False):
+    """
+    Works like sift_, but modify given dict in place.
+
+    :param dictionary: set of elements to select subset
+    :param condition: function (name matters): key -> bool or  value -> bool or key, value -> bool)
+        selected remain elements
+    :param opposite: if True replace "condition" by "not condition" (default False)
+    :return: subset of elements which fulfilled given condition
+    """
+
+    selector = _selector(condition)
+
+    for each in list(dictionary):
+        if bool(opposite) == bool(selector(each, dictionary[each])):
+            del dictionary[each]
 
 
 def _selector(condition):
