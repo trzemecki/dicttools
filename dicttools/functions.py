@@ -1,6 +1,7 @@
 import collections
 import functools
 import operator
+import inspect
 
 
 def two_way(dictionary):
@@ -127,7 +128,8 @@ def split(elements, *conditions, **kwargs):
         [{0: 'A', 3: 'D'}, {2: 'C', 4: 'E'}, {1: 'B'}]
 
     :param elements: elements to split into other sets of elements
-    :param conditions: lambdas (key -> bool) to decide to include or not element in current result
+    :param conditions: functions (name matters): key -> bool or  value -> bool or key, value -> bool)
+        which decide that element in current result should be included or not
     :param rest: True if should append at end elements which not fulfilled any condition, False otherwise
     :return: generator for element split according to given condition
     """
@@ -135,10 +137,24 @@ def split(elements, *conditions, **kwargs):
     rest = kwargs.get('rest', True)
 
     for condition in conditions:
-        yield sift(elements, condition)
-        elements = sift(elements, condition, opposite=True)
+        selected, elements = _split_two(elements, condition)
+        yield selected
     if rest:
         yield elements
+
+
+def _split_two(elements, condition):
+    selector = _selector(condition)
+
+    yes, no = {}, {}
+
+    for key, value in elements.items():
+        if selector(key, value):
+            yes[key] = value
+        else:
+            no[key] = value
+
+    return yes, no
 
 
 def sift(elements, condition, opposite=False):
@@ -146,18 +162,27 @@ def sift(elements, condition, opposite=False):
     Select elements from dictionary, which fulfilled given condition
 
     :param elements: set of elements for select subset
-    :param condition: lambda (key -> bool or key, value -> bool) to select remain elements
+    :param condition: function (name matters): key -> bool or  value -> bool or key, value -> bool)
+        selected remain elements
     :param opposite: if True replace "condition" by "not condition" (default False)
     :return: subset of elements which fulfilled given condition
     """
 
-    def select(key, value):
-        try:
-            return bool(opposite) != bool(condition(key, value))  # != <=> xor
-        except TypeError:
-            return bool(opposite) != bool(condition(key))
+    selector = _selector(condition)
 
-    return {key: value for key, value in elements.items() if select(key, value)}
+    return {key: value for key, value in elements.items() if bool(opposite) != bool(selector(key, value))}
+
+
+def _selector(condition):
+    spec = inspect.getargspec(condition)
+    ismethod = inspect.ismethod(condition)
+
+    if spec.varargs or len(spec.args) - ismethod == 2:
+        return lambda key, value: condition(key, value)
+    elif spec.args[ismethod] in ['v', 'val', 'value']:
+        return lambda key, value: condition(value)
+    else:
+        return lambda key, value: condition(key)
 
 
 def contains(sub, super):
