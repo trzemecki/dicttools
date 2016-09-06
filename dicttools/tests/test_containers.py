@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import unittest
 
 import six
@@ -216,3 +218,111 @@ class FrozenDictTests(unittest.TestCase):
 
     def create_frozendict(self, *args, **kwargs):
         return dicttools.FrozenDict(*args, **kwargs)
+
+
+class ChainMapTest(unittest.TestCase):
+    def test_GetItem_ItemInLastDict_ReturnValue(self):
+        chain = self.create([
+            {'a': 1, 'b': 2},
+            {'c': 3, 'd': 4},
+            {'e': 5, 'f': 6},
+        ])
+        
+        self.assertEqual(6, chain['f'])
+
+    def test_GetItem_ItemInFirstAndLastDict_ReturnValueFromFirst(self):
+        chain = self.create([
+            {'a': 1, 'b': 2},
+            {'c': 3, 'd': 4},
+            {'e': 5, 'a': 6},
+        ])
+
+        self.assertEqual(1, chain['a'])
+
+    def test_GetItem_ItemNotInChain_Throws(self):
+        chain = self.create([
+            {'a': 1, 'b': 2},
+            {'c': 3, 'd': 4},
+            {'e': 5, 'f': 6},
+        ])
+
+        with self.assertRaisesRegexp(KeyError, 'g'):
+            r = chain['g']
+
+    def test_Get_ItemInChain_ReturnValue(self):
+        chain = self.create([
+            {'a': 1, 'b': 2},
+            {'c': 3, 'd': 4},
+            {'e': 5, 'f': 6},
+        ])
+
+        self.assertEqual(4, chain.get('d', -1))
+
+    def test_Get_ItemNotInChain_ReturnValue(self):
+        chain = self.create([
+            {'a': 1, 'b': 2},
+            {'c': 3, 'd': 4},
+            {'e': 5, 'f': 6},
+        ])
+
+        self.assertEqual(-1, chain.get('x', -1))
+
+    def test_SetItem_ItemInOneMap_ChangeValueInMap(self):
+        chain = self.create([
+            {'a': 1, 'b': 2},
+            {'c': 3, 'd': 4},
+            {'e': 5, 'f': 6},
+        ])
+
+        chain['d'] = 98
+
+        self.assertEqual(98, chain['d'])
+
+    def test_SetItem_ItemInManyMaps_ChangeValueInFirstFoundedMap(self):
+        maps = [{'a': 1, 'b': 2}, {'c': 3, 'd': 4}, {'e': 5, 'a': 6}]
+        chain = self.create(maps)
+
+        chain['a'] = 98
+
+        self.assertEqual(98, maps[0]['a'])
+        self.assertEqual(6, maps[-1]['a'])
+
+    def test_SetItem_ItemInNotInChain_Throws(self):
+        maps = [{'a': 1, 'b': 2}, {'c': 3, 'd': 4}, {'e': 5, 'a': 6}]
+        chain = self.create(maps)
+
+        with self.assertRaisesRegexp(KeyError, 'x'):
+            chain['x'] = 98
+
+    def test_DelItem_ItemInManyMaps_DeleteFirstFoundedItem(self):
+        maps = [{'a': 1, 'b': 2}, {'c': 3, 'd': 4}, {'e': 5, 'a': 6}]
+        chain = self.create(maps)
+
+        del chain['a']
+
+        self.assertEqual(6, chain['a'])
+
+    def test_DelItem_ItemInNotInChain_Throws(self):
+        maps = [{'a': 1, 'b': 2}, {'c': 3, 'd': 4}, {'e': 5, 'a': 6}]
+        chain = self.create(maps)
+
+        with self.assertRaisesRegexp(KeyError, 'x'):
+            del chain['x']
+
+    def test_Len_Always_ReturnSumOfLengthOfMaps(self):
+        maps = [{'a': 1, 'b': 2}, {'c': 3, 'd': 4}, {'e': 5, 'a': 6}]
+        chain = self.create(maps)
+        
+        self.assertEqual(6, len(chain))
+        
+    def test_Iter_Always_ReturnKeysGenerator(self):
+        maps = [{'a': 1, 'b': 2}, {'c': 3, 'd': 4}, {'e': 5, 'a': 6}]
+        chain = self.create(maps)
+
+        result = sorted(chain)
+
+        self.assertEqual(['a', 'a', 'b', 'c', 'd', 'e'], result)
+
+    def create(self, maps):
+        return dicttools.ChainMap(maps)
+    

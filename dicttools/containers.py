@@ -1,5 +1,6 @@
 import bisect
 import collections
+import itertools
 
 
 class FrozenDict(collections.Mapping):
@@ -83,3 +84,80 @@ class FrozenDict(collections.Mapping):
 
     def copy(self):
         return FrozenDict(self)
+
+
+class ChainMap(collections.MutableMapping):
+    """
+    Object for multiple dicts aggregation for iterate, getting, setting and deleting
+    as single dict.
+
+    When key is many dict then item is consider as the fist founded::
+
+        >>> chain = ChainMap([{'a': 1}, {'b': 2}, {'a': 4}])
+        >>> chain['a']
+        1
+
+    In the same way works deletion and setting::
+
+        >>> chain = ChainMap([{'a': 1}, {'b': 2}, {'a': 4}])
+        >>> chain['a'] = 9
+        >>> chain
+        ChainMap([{'a': 9}, {'b': 2}, {'a': 4}])
+        >>> del chain['a']
+        >>> chain
+        ChainMap([{}, {'b': 2}, {'a': 4}])
+
+    When key is not in any of dicts (maps) KeyException is raised::
+
+        >>> chain = ChainMap([{'a': 1}, {'b': 2}, {'a': 4}])
+        >>> chain['x'] = 9
+        Traceback (most recent call last):
+        ...
+        KeyError: 'x'
+
+    """
+
+    def __init__(self, maps):
+        """
+        Create view of iterable of dict tool set. Given argument is handle by reference,
+        hence each change affected this chain. Given maps are encapsulated and cannot be
+        accessed via ChainMap, so keep it separately.
+
+        :param maps: iterable of dicts **(but not iterator)**
+        """
+        self._maps = maps
+
+    def __iter__(self):
+        return itertools.chain(*self._maps)
+
+    def __getitem__(self, key):
+        for item in self._maps:
+            if key in item:
+                return item[key]
+
+        raise KeyError(key)
+
+    def __setitem__(self, key, value):
+        for item in self._maps:
+            if key in item:
+                item[key] = value
+                return
+
+        raise KeyError(key)
+
+    def __delitem__(self, key):
+        for item in self._maps:
+            if key in item:
+                del item[key]
+                return
+
+        raise KeyError(key)
+
+    def __len__(self):
+        return sum(map(len, self._maps))
+
+    def __str__(self):
+        return str(tuple(self._maps))
+
+    def __repr__(self):
+        return 'ChainMap(' + repr(list(self._maps)) + ')'
