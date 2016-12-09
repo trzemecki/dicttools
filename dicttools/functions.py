@@ -24,7 +24,7 @@ def swap(dictionary):
     Create new dict with given dictionary keys as values and values as keys::
 
         >>> swap({0: 'A', 1: 'B', 2: 'C'})
-        {'A': 0, 'B': 1, 'C': 2}
+        {'A': 0, 'C': 2, 'B': 1}
 
     :param dict dictionary: dict to swap
     :return: new swapped dict
@@ -41,14 +41,15 @@ def by(key, *elements):
         >>> by('real', (1+2j), (2-3j),(-5+0j))
         {1.0: (1+2j), 2.0: (2-3j), -5.0: (-5+0j)}
 
-        >>> by('real', [(1+2j), (2-3j),(-5+0j)])
-        {1.0: (1+2j), 2.0: (2-3j), -5.0: (-5+0j)}
+        >>> by('imag', [(1+2j), (2-3j),(-5+0j)])
+        {0.0: (-5+0j), 2.0: (1+2j), -3.0: (2-3j)}
 
 
     :param elements: iterable of elements or elements as varargs
     :param key: attribute, by which element could be accessed or lambda function
     :return: dict with elements, assigned to extracted key
     """
+
     if not callable(key):
         key = operator.attrgetter(key)
 
@@ -90,6 +91,7 @@ def select(source, *elements):
     :param elements: values which should be selected
     :return: dict with selected values
     """
+
     return extract(source, *elements, key=operator.getitem)
 
 
@@ -124,7 +126,7 @@ def merge(*dicts):
     which contains this key::
 
         >>> merge({'A': 1}, {'B': 2}, {'C': 3})
-        {'A': 1, 'B': 2, 'C': 3}
+        {'A': 1, 'C': 3, 'B': 2}
 
     :param dicts: dicts to merge
     :return: dict contained all element from given dicts
@@ -146,7 +148,7 @@ def split(dictionary, *conditions, **kwargs):
 
     When the elements which are not follow any given condition should be omitted set rest attribute to False::
 
-        >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%2 == 0), rest=False)
+        >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%2 == 0, rest=False))
         [{0: 'A', 2: 'C', 4: 'E'}]
 
     When more than one condition is given element was included in first dictionary, which for condition
@@ -209,7 +211,6 @@ def sift_update(dictionary, condition, opposite=False):
     :param condition: function (name matters): key -> bool or  value -> bool or key, value -> bool)
         selected remain elements
     :param opposite: if True replace "condition" by "not condition" (default False)
-    :return: subset of elements which fulfilled given condition
     """
 
     selector = _selector(condition)
@@ -254,6 +255,7 @@ def map_values(function, dictionary):
     :param dictionary: dictionary to mapping
     :return: dict with changed values
     """
+
     return {key: function(value) for key, value in dictionary.items()}
 
 
@@ -265,4 +267,29 @@ def map_keys(function, dictionary):
     :param dictionary: dictionary to mapping
     :return: dict with changed (mapped) keys
     """
+
     return {function(key): value for key, value in dictionary.items()}
+
+
+def find_key(value, dictionary, default=None):
+    """
+    Function find key in dict for given value. If not found return default value (None or given).
+    If many elements can be found return one of it (first founded)::
+
+        >>> find_key('d', {'a': 'b', 'c': 'd'})
+        'c'
+
+        >>> find_key('c', {'a': 'b', 'c': 'd'}, default=-1)
+        -1
+
+    :param value: value in dictionary, which for is searching a key
+    :param dictionary: dictionary to search in
+    :param default: value returned if value is not in dictionary (default None)
+    :return: key which value in dictionary is assigned to
+    """
+
+    for key, item_value in dictionary.items():
+        if value == item_value:
+            return key
+
+    return default
