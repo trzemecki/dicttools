@@ -161,3 +161,51 @@ class ChainMap(collections.MutableMapping):
 
     def __repr__(self):
         return 'ChainMap(' + repr(list(self._maps)) + ')'
+
+
+class TwoWayDict(collections.MutableMapping):
+    def __init__(self, *args, **kwargs):
+        self._direct = {}
+        self._reversed = {}
+
+        for key, value in dict(*args, **kwargs).items():
+            self[key] = value
+
+    def __iter__(self):
+        return itertools.chain(iter(self._direct), iter(self._reversed))
+
+    def __delitem__(self, key):
+        self._clear_values(key)
+
+    def __len__(self):
+        return len(self._direct) + len(self._reversed)
+
+    def __getitem__(self, key):
+        try:
+            return self._direct[key]
+        except KeyError:
+            return self._reversed[key]
+
+    def __setitem__(self, key, value):
+        self._clear_values(key, value)
+
+        self._direct[key] = value
+        self._reversed[value] = key
+
+    def _clear_values(self, *values):
+        to_del = []
+
+        for each in values:
+            if each in self._reversed:
+                to_del.append(self._reversed[each])
+
+        for each in values:
+            if each in self._direct:
+                self._reversed.pop(self._direct[each], None)
+
+        for each in to_del:
+            self._direct.pop(each, None)
+
+        for each in values:
+            self._direct.pop(each, None)
+            self._reversed.pop(each, None)
