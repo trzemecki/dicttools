@@ -16,27 +16,27 @@ class FrozenDict(collections.Mapping):
         To create empty frozen dictionary::
 
             >>> FrozenDict()
-            ${}
+            FrozenDict({})
 
         To create frozen dict from mapping::
 
             >>> FrozenDict({'x': 4.5, 'y': 3})
-            ${'x': 4.5, 'y': 3}
+            FrozenDict({'x': 4.5, 'y': 3})
 
         To create frozen dict from iterable (of 2-tuple pairs of key and value)::
 
             >>> FrozenDict((('x', 4.5), ('y', 3)))
-            ${'x': 4.5, 'y': 3}
+            FrozenDict({'x': 4.5, 'y': 3})
 
         Using kwargs::
 
             >>> FrozenDict(x=4.5, y=3)
-            ${'x': 4.5, 'y': 3}
+            FrozenDict({'x': 4.5, 'y': 3})
 
         Using kwargs with other method::
 
             >>> FrozenDict({'x': 4.5}, y=3)
-            ${'x': 4.5, 'y': 3}
+            FrozenDict({'x': 4.5, 'y': 3})
         """
 
         if not kwargs and len(args) == 1 and isinstance(args[0], collections.Mapping):
@@ -161,3 +161,78 @@ class ChainMap(collections.MutableMapping):
 
     def __repr__(self):
         return 'ChainMap(' + repr(list(self._maps)) + ')'
+
+
+class TwoWayDict(collections.MutableMapping):
+    """
+    Object for storing values and keys accessible either by value and by key.
+
+        >>> container = TwoWayDict(a=1, b=2)
+        >>> container[1]
+        'a'
+        >>> container['b']
+        2
+        >>> container[3] = 'c'
+        >>> container['c']
+        3
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Init arguments is analogical as dict. Both values and keys have to be
+        hashable (otherwise TypeError is raised). If values is not unique, duplicated elements
+        will be omitted. If there are paris with reversed equivalents only one pair will be contained
+        """
+
+        self._direct = {}
+        self._reversed = {}
+
+        for key, value in dict(*args, **kwargs).items():
+            self[key] = value
+
+    def __iter__(self):
+        return itertools.chain(iter(self._direct), iter(self._reversed))
+
+    def __delitem__(self, key):
+        self._clear_values(key)
+
+    def __len__(self):
+        return len(self._direct) + len(self._reversed)
+
+    def __getitem__(self, key):
+        try:
+            return self._direct[key]
+        except KeyError:
+            return self._reversed[key]
+
+    def __setitem__(self, key, value):
+        self._clear_values(key, value)
+
+        self._direct[key] = value
+
+        if value != key:
+            self._reversed[value] = key
+
+    def _clear_values(self, *values):
+        to_del = []
+
+        for each in values:
+            if each in self._reversed:
+                to_del.append(self._reversed[each])
+
+        for each in values:
+            if each in self._direct:
+                self._reversed.pop(self._direct[each], None)
+
+        for each in to_del:
+            self._direct.pop(each, None)
+
+        for each in values:
+            self._direct.pop(each, None)
+            self._reversed.pop(each, None)
+
+    def __str__(self):
+        return '{%s}' % ', '.join(('%r: %r' % (key, value) for key, value in itertools.chain(self._direct.items(), self._reversed.items())))
+
+    def __repr__(self):
+        return 'TwoWayDict(%r)' % self._direct

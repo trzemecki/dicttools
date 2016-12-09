@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import unittest
 
 import mock
@@ -195,3 +197,24 @@ class DictToolsTests(unittest.TestCase):
         result = dicttools.map_keys(lambda v: chr(ord(v) + 1), source)
 
         self.assertEqual({'i': 1, 'b': 2, 'm': 3}, result)
+
+    def test_FindKey_ValueNotInDict_ReturnDefaultValue(self):
+        elements = {'h': 1, 'a': 2, 'l': 3}
+
+        result = dicttools.find_key(4, elements, default='y')
+
+        self.assertEqual('y', result)
+
+    def test_FindKey_ValueUniqueInDict_ReturnKeyForGivenValue(self):
+        elements = {'h': 1, 'a': 2, 'l': 3}
+
+        result = dicttools.find_key(2, elements, default='y')
+
+        self.assertEqual('a', result)
+
+    def test_FindKey_ValueDuplicatedInDict_ReturnAnyKeyForGivenValue(self):
+        elements = {'h': 1, 'a': 2, 'l': 3, 'x': 1}
+
+        result = dicttools.find_key(1, elements, default='y')
+
+        self.assertEqual(1, elements[result])
