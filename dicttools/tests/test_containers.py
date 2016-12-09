@@ -335,10 +335,10 @@ class TwoWayDictTest(unittest.TestCase):
 
         self.assertEqual(4, len(container))
 
-    def test_Init_GiveDictWith1EqualKeyAndValue_Contains2Elements(self):
+    def test_Init_GiveDictWith1EqualKeyAndValue_Contains1Elements(self):
         container = self.create({'alpha': 'alpha'})
 
-        self.assertEqual(2, len(container))
+        self.assertEqual(1, len(container))
 
     def test_Init_GiveDictWithPairAndReversedPair_Contains2Elements(self):
         container = self.create({'alpha': 'beta', 'beta': 'alpha'})
@@ -435,13 +435,13 @@ class TwoWayDictTest(unittest.TestCase):
 
         self.assertEqual({'alpha', 'beta', 'delta', 'omega'}, result)
 
-    def test_SetItem_ReassignEqualKeyAndValue_Contains2Values(self):
+    def test_SetItem_ReassignEqualKeyAndValue_Contains1Values(self):
         container = self.create()
 
         container['alpha'] = 'alpha'
         container['alpha'] = 'alpha'
 
-        self.assertEqual(2, len(container))
+        self.assertEqual(1, len(container))
 
     def test_DelItem_DeleteKey_RemoveKeyAndValue(self):
         container = self.create()
@@ -475,6 +475,29 @@ class TwoWayDictTest(unittest.TestCase):
 
         result = set(iter(container))
         self.assertEqual({'delta', 'beta'}, result)
+
+    def test_Str_OnePair_ReturnStringWithKeyValuesPairsAsSimpleDict(self):
+        container = self.create()
+
+        container['delta'] = 'beta'
+
+        self.assertEqual("{'delta': 'beta', 'beta': 'delta'}", str(container))
+
+    def test_Str_EqualKeyAndValue_Return1Value(self):
+        container = self.create()
+
+        container['alpha'] = 'alpha'
+
+        self.assertEqual("{'alpha': 'alpha'}", str(container))
+
+    def test_Repr_Always_ReturnStringWithOnlyDirectAssignment(self):
+        container = self.create()
+
+        container['delta'] = 'beta'
+
+        self.assertEqual("TwoWayDict({'delta': 'beta'})", repr(container))
+
+
 
     @staticmethod
     def create(*args, **kwargs):

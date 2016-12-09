@@ -29,3 +29,14 @@ Each modification in maps automatically affect the chain, because maps is contai
 
 .. autoclass:: dicttools.ChainMap
     :members: __init__
+
+
+TwoWayDict
+----------
+
+``TwoWayDict`` is container for storing pairs key-value with additional reversed access.
+It means, when you assign value to key, the key can be also accessible by value.
+Is important to handle both keys and variables as hashable.
+
+.. autoclass:: dicttools.TwoWayDict
+    :members: __init__

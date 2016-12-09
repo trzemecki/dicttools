@@ -16,27 +16,27 @@ class FrozenDict(collections.Mapping):
         To create empty frozen dictionary::
 
             >>> FrozenDict()
-            ${}
+            FrozenDict({})
 
         To create frozen dict from mapping::
 
             >>> FrozenDict({'x': 4.5, 'y': 3})
-            ${'x': 4.5, 'y': 3}
+            FrozenDict({'x': 4.5, 'y': 3})
 
         To create frozen dict from iterable (of 2-tuple pairs of key and value)::
 
             >>> FrozenDict((('x', 4.5), ('y', 3)))
-            ${'x': 4.5, 'y': 3}
+            FrozenDict({'x': 4.5, 'y': 3})
 
         Using kwargs::
 
             >>> FrozenDict(x=4.5, y=3)
-            ${'x': 4.5, 'y': 3}
+            FrozenDict({'x': 4.5, 'y': 3})
 
         Using kwargs with other method::
 
             >>> FrozenDict({'x': 4.5}, y=3)
-            ${'x': 4.5, 'y': 3}
+            FrozenDict({'x': 4.5, 'y': 3})
         """
 
         if not kwargs and len(args) == 1 and isinstance(args[0], collections.Mapping):
@@ -164,7 +164,26 @@ class ChainMap(collections.MutableMapping):
 
 
 class TwoWayDict(collections.MutableMapping):
+    """
+    Object for storing values and keys accessible either by value and by key.
+
+        >>> container = TwoWayDict(a=1, b=2)
+        >>> container[1]
+        'a'
+        >>> container['b']
+        2
+        >>> container[3] = 'c'
+        >>> container['c']
+        3
+    """
+
     def __init__(self, *args, **kwargs):
+        """
+        Init arguments is analogical as dict. Both values and keys have to be
+        hashable (otherwise TypeError is raised). If values is not unique, duplicated elements
+        will be omitted. If there are paris with reversed equivalents only one pair will be contained
+        """
+
         self._direct = {}
         self._reversed = {}
 
@@ -190,7 +209,9 @@ class TwoWayDict(collections.MutableMapping):
         self._clear_values(key, value)
 
         self._direct[key] = value
-        self._reversed[value] = key
+
+        if value != key:
+            self._reversed[value] = key
 
     def _clear_values(self, *values):
         to_del = []
@@ -209,3 +230,9 @@ class TwoWayDict(collections.MutableMapping):
         for each in values:
             self._direct.pop(each, None)
             self._reversed.pop(each, None)
+
+    def __str__(self):
+        return '{%s}' % ', '.join(('%r: %r' % (key, value) for key, value in itertools.chain(self._direct.items(), self._reversed.items())))
+
+    def __repr__(self):
+        return 'TwoWayDict(%r)' % self._direct
