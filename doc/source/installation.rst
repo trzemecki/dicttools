@@ -12,6 +12,12 @@ Using pip (recommended)
 
     $ pip install git+git://github.com/trzemecki/dicttools.git
 
+3. If you have already installed previous version, upgrade it by:
+
+.. code-block:: bash
+
+    $ pip install git+git://github.com/trzemecki/dicttools.git --upgrade
+
 By downloading
 --------------
 
