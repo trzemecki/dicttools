@@ -39,11 +39,15 @@ class FrozenDict(collections.Mapping):
             FrozenDict({'x': 4.5, 'y': 3})
         """
 
-        if not kwargs and len(args) == 1 and isinstance(args[0], collections.Mapping):
-            content = args[0]
+        if not kwargs:
+            if len(args) == 1 and isinstance(args[0], collections.Mapping):
+                content = args[0]
+            else:
+                content = collections.OrderedDict(*args)
         else:
             content = dict(*args, **kwargs)
 
+        self._order = tuple(content)
         self._keys = tuple(sorted(content))
         self._values = tuple(content[key] for key in self._keys)
 
@@ -65,7 +69,7 @@ class FrozenDict(collections.Mapping):
             raise KeyError(item)
 
     def __iter__(self):
-        return iter(self._keys)
+        return iter(self._order)
 
     def __len__(self):
         return len(self._keys)

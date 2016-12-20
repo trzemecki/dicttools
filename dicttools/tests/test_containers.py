@@ -49,7 +49,7 @@ class FrozenDictTests(unittest.TestCase):
         self.assertEqual(2.72, instance['e'])
 
     def test_Init_IterableValuesAreNotPairs_Throws(self):
-        with self.assertRaisesRegexp(TypeError, "cannot convert dictionary update sequence element #0 to a sequence"):
+        with self.assertRaisesRegexp(TypeError, "'int' object is not iterable"):
             self.create([1, 2, 3])
 
     def test_GetItem_NotExists_Throws(self):
@@ -113,6 +113,13 @@ class FrozenDictTests(unittest.TestCase):
         result = instance.keys()
 
         self.assertEqual(['b', 'd'], list(result))
+
+    def test_Keys_InitWitKeysInOrder_KeepKeysInGivenOrder(self):
+        instance = self.create([('d', 1), ('b', 2), ('c', 3)])
+
+        result = instance.keys()
+
+        self.assertEqual(['d', 'b', 'c'], list(result))
 
     def test_Str_Always_IsDollarAndKeyValuePairsInBraces(self):
         instance = self.create({'b': 1, 'd': 2})
