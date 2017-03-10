@@ -129,3 +129,41 @@ class MultiDictTest(unittest.TestCase):
     def create(*args, **kwargs):
         return dicttools.multidimensional.MultiDict(*args, **kwargs)
 
+
+class NamedMultiDict(unittest.TestCase):
+    def test_Get_GiveAllKeys_ReturnAssignedValue(self):
+        instance = self.create([
+            [12, 13],
+            [25, 34],
+            [56, 89],
+        ], [[1, 2, 3], ['A', 'B']], ['row', 'column'])
+
+        actual = instance.get(row=2, column='B')
+
+        self.assertEqual(34, actual)
+
+    def test_Get_GetValuePartial_ReturnAssignedValue(self):
+        instance = self.create([
+            [12, 13],
+            [25, 34],
+            [56, 89],
+        ], [[1, 2, 3], ['A', 'B']], ['row', 'column'])
+
+        actual = instance.get(row=2).get(column='B')
+
+        self.assertEqual(34, actual)
+
+    def test_Get_GetValuePartialStartInNested_ReturnAssignedValue(self):
+        instance = self.create([
+            [12, 13],
+            [25, 34],
+            [56, 89],
+        ], [[1, 2, 3], ['A', 'B']], ['row', 'column'])
+
+        actual = instance.get(column='B').get(row=2)
+
+        self.assertEqual(34, actual)
+
+    @staticmethod
+    def create(*args, **kwargs):
+        return dicttools.multidimensional.NamedMultiDict(*args, **kwargs)

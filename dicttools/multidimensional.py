@@ -131,7 +131,27 @@ class MultiDict(object):
         return not self == other
 
 
-class _MultiDictView(object):
+class _DictView(object):
+    def reduce(self, key=None):
+        raise NotImplementedError
+
+    def __eq__(self, other):
+        if isinstance(other, (tuple, list)):
+            other = MultiDict(other)
+
+        if isinstance(other, MultiDict):
+            return self.reduce() == other
+
+        return False
+
+    def __repr__(self):
+        return repr(self.reduce())
+
+    def __ne__(self, other):
+        return not self == other
+
+
+class _MultiDictView(_DictView):
     def __init__(self, source, key):
         self._source = source
         self._key = key
@@ -173,23 +193,81 @@ class _MultiDictView(object):
         if isinstance(reduced_item, slice):
             reduced_indices = set(self._source.item_to_index(reduced_item, col))
 
-            if set(reduced_item) | reduced_indices != reduced_indices:
+            if set(indices) | reduced_indices != reduced_indices:
                 raise KeyError(other_key)
 
         elif self._source.item_to_index(reduced_item, col) not in indices:
             raise KeyError(other_key)
 
-    def __eq__(self, other):
-        if isinstance(other, (tuple, list)):
-            other = MultiDict(other)
 
-        if isinstance(other, MultiDict):
-            return self.reduce() == other
+class NamedMultiDict(MultiDict):
+    def __init__(self, data=None, headers=None, names=None):
+        super(NamedMultiDict, self).__init__(data, headers)
+        self._names = names
 
-        return False
+    def _keywords_to_key(self, kwargs):
+        key = []
 
-    def __repr__(self):
-        return repr(self.reduce())
+        for name in self._names:
+            key.append(kwargs.pop(name, slice(None)))
 
-    def __ne__(self, other):
-        return not self == other
+        return tuple(key)
+
+    def get(self, **kwargs):
+        key = self._keywords_to_key(kwargs)
+        result = self[key]
+
+        if isinstance(result, _DictView):
+            return _NamedMultiDictViewDecorator(result, self._reduce_names(key))
+
+        return result
+
+    def _reduce_names(self, key):
+        result = []
+
+        for name, token in zip(self._names, key):
+            if isinstance(token, slice):
+                result.append(name)
+
+        return tuple(result)
+
+
+class _NamedMultiDictViewDecorator(_DictView):
+    def __init__(self, view, names):
+        self._view = view
+        self._names = names
+
+    def __getitem__(self, item):
+        return self._view[item]
+
+    def __setitem__(self, key, value):
+        self._view[key] = value
+
+    def reduce(self, key=None):
+        return self._view.reduce(key)
+
+    def _keywords_to_key(self, kwargs):
+        key = []
+
+        for name in self._names:
+            key.append(kwargs.pop(name, slice(None)))
+
+        return tuple(key)
+
+    def _reduce_names(self, key):
+        result = []
+
+        for name, token in zip(self._names, key):
+            if isinstance(token, slice):
+                result.append(name)
+
+        return tuple(result)
+
+    def get(self, **kwargs):
+        key = self._keywords_to_key(kwargs)
+        result = self[key]
+
+        if isinstance(result, _DictView):
+            return _NamedMultiDictViewDecorator(self, self._reduce_names(key))
+
+        return result
