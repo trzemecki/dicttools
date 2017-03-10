@@ -28,6 +28,16 @@ class DictToolsTests(unittest.TestCase):
 
         self.assertEqual(12, result['X'])
 
+    def test_Merge_NoneGiven_IgnoreNones(self):
+        result = dicttools.merge({'A': 1}, {'B': 2}, None, {'C': 3})
+
+        self.assertEqual({'A', 'B', 'C'}, set(result))
+
+    def test_Merge_OnlyNonesGiven_ReturnEmptyDict(self):
+        result = dicttools.merge(None, None)
+
+        self.assertEqual({}, result)
+
     def test_ByKey_Always_ReturnDictWithValuesAssignedToExtractedKey(self):
         values = (mock.Mock(id=3), mock.Mock(id=6))
 

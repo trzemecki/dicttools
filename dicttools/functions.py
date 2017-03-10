@@ -133,7 +133,8 @@ def merge(*dicts):
     """
 
     def update(result, item):
-        result.update(item)
+        if item is not None:
+            result.update(item)
         return result
 
     return functools.reduce(update, dicts, dict())
