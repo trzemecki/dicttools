@@ -303,7 +303,7 @@ def fill_value(keys, value):
         >>> fill_value([1, 2, 3], 'a')
         {1: 'a', 2: 'a', 3: 'a'}
 
-    :param keys: keys, witch returned dict should contains
+    :param keys: keys, which returned dict should contains
     :param value: value, which should be assigned to each key
     :return: dict with value assigned do each given key
     """

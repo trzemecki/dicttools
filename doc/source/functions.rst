@@ -17,3 +17,4 @@ Module functions
 .. autofunction:: dicttools.map_values
 .. autofunction:: dicttools.map_keys
 .. autofunction:: dicttools.find_key
+.. autofunction:: dicttools.fill_value
