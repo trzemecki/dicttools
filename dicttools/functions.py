@@ -293,3 +293,17 @@ def find_key(value, dictionary, default=None):
             return key
 
     return default
+
+
+def fill_value(keys, value):
+    """
+    Function return dict with given value assigned to each given key.
+
+        >>> fill_value([1, 2, 3], 'a')
+        {1: 'a', 2: 'a', 3: 'a'}
+
+    :param keys: keys, witch returned dict should contains
+    :param value: value, which should be assigned to each key
+    :return: dict with value assigned do each given key
+    """
+    return {key: value for key in keys}

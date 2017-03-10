@@ -218,3 +218,18 @@ class DictToolsTests(unittest.TestCase):
         result = dicttools.find_key(1, elements, default='y')
 
         self.assertEqual(1, elements[result])
+
+    def test_FillValue_NoKeys_ReturnEmptyDict(self):
+        actual = dicttools.fill_value([], 'val')
+
+        self.assertEqual({}, actual)
+
+    def test_FillValue_ListOfKeysGiven_ReturnDictWithAssignedValueForEachGivenKey(self):
+        keys = ['alpha', 'beta', 'gamma']
+
+        actual = dicttools.fill_value(keys, 'val')
+
+        expected = {
+            'alpha': 'val', 'beta': 'val', 'gamma': 'val'
+        }
+        self.assertEqual(expected, actual)
