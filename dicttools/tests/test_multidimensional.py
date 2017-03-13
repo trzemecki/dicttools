@@ -125,9 +125,49 @@ class MultiDictTest(unittest.TestCase):
 
         self.assertEqual(expected, instance)
 
-    @staticmethod
-    def create(*args, **kwargs):
-        return dicttools.multidimensional.MultiDict(*args, **kwargs)
+    def test_Items_2Dimensional_ReturnAllSetItems(self):
+        instance = self.create([
+            [12, 13, 14],
+            [25, 34, 35],
+        ], headers=[[1, 2], ['A', 'B', 'C']])
+
+        items = instance.items()
+
+        self.assertEqual(6, len(items))
+
+    def test_Items_2Dimensional_ReturnKeyWithValue(self):
+        instance = self.create([
+            [12, 13, 14],
+            [25, 34, 35],
+        ], headers=[[1, 2], ['A', 'B', 'C']])
+
+        items = instance.items()
+
+        self.assertIn(((1, 'B'), 13), items)
+
+    def test_ToNested_2Dimensional_RowDictsNestedInDict(self):
+        instance = self.create([
+            [12, 13, 14],
+            [25, 34, 35],
+        ], headers=[[1, 2], ['A', 'B', 'C']])
+
+        actual = instance.to_nested()
+
+        self.assertIsInstance(actual, dict)
+        self.assertEqual(34, actual[2]['B'])
+
+    def test_FromFlat_ItemsGiven_ReturnMultiDictWithGivenValues(self):
+        instance = self.from_flat({
+            (1, 'A'): 12,
+            (2, 'B'): 34,
+        })
+
+        actual = instance[2, 'B']
+
+        self.assertEqual(34, actual)
+
+    create = staticmethod(dicttools.multidimensional.MultiDict)
+    from_flat = staticmethod(dicttools.multidimensional.MultiDict.from_flat)
 
 
 class NamedMultiDict(unittest.TestCase):

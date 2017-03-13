@@ -2,6 +2,14 @@ import six.moves
 
 
 class MultiDict(object):
+    @classmethod
+    def from_flat(cls, data, **kwargs):
+        result = cls(**kwargs)
+        for key, value in data.items():
+            result[key] = value
+
+        return result
+
     def __init__(self, data=None, headers=None):
         self._headers = None if headers is None else [list(each) for each in headers]
 
@@ -31,6 +39,12 @@ class MultiDict(object):
     @property
     def size(self):
         return len(self._headers or [])
+
+    def items(self):
+        return tuple(
+            (tuple(headers[token] for token, headers in zip(key, self._headers)), value)
+            for key, value in self._items.items()
+        )
 
     def __getitem__(self, key):
         if not isinstance(key, tuple):
@@ -110,11 +124,26 @@ class MultiDict(object):
             return headers.index(token)
         except ValueError:
             if not insert:
-                raise
+                raise KeyError(token)
 
         new_index = len(headers)
         headers.append(token)
         return new_index
+
+    def to_nested(self):
+        def add(dictionary, key, value):
+            if len(key) == 1:
+                dictionary[key[0]] = value
+            else:
+                nested = dictionary.setdefault(key[0], {})
+                add(nested, key[1:], value)
+
+        result = {}
+
+        for k, v in self.items():
+            add(result, k, v)
+
+        return result
 
     def __repr__(self):
         return repr(self._items)
@@ -243,6 +272,9 @@ class _NamedMultiDictViewDecorator(_DictView):
 
     def __setitem__(self, key, value):
         self._view[key] = value
+
+    def items(self):
+        return self.reduce().items()
 
     def reduce(self, key=None):
         return self._view.reduce(key)
