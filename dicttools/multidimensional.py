@@ -46,6 +46,9 @@ class MultiDict(object):
             for key, value in self._items.items()
         )
 
+    def __len__(self):
+        return len(self._items)
+
     def __getitem__(self, key):
         if not isinstance(key, tuple):
             key = (key,)
@@ -126,6 +129,17 @@ class MultiDict(object):
         new_index = len(headers)
         headers.append(token)
         return new_index
+
+    def merge(self, other):
+        result = self.copy()
+
+        for key, value in other.items():
+            result[key] = value
+
+        return result
+
+    def copy(self):
+        return MultiDict(self._items, self._headers)
 
     def to_nested(self):
         def add(dictionary, key, value):
@@ -264,6 +278,9 @@ class NamedMultiDict(MultiDict, _NamedMixin):
     def __init__(self, data=None, headers=None, names=None):
         super(NamedMultiDict, self).__init__(data, headers)
         self._names = names
+
+    def copy(self):
+        return NamedMultiDict(self._items, self._headers, self._names)
 
 
 class _NamedMultiDictViewDecorator(_DictView, _NamedMixin):

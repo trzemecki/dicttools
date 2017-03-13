@@ -166,6 +166,52 @@ class MultiDictTest(unittest.TestCase):
 
         self.assertEqual(34, actual)
 
+    def test_Merge_WithEmptyDict_ReturnNewEqual(self):
+        dict1 = self.from_flat({
+            (1, 'A'): 12,
+            (2, 'B'): 34,
+        })
+
+        dict2 = self.create()
+
+        actual = dict1.merge(dict2)
+
+        self.assertIsNot(dict1, actual)
+        self.assertEqual(2, len(actual))
+        self.assertEqual(34, actual[2, 'B'])
+
+    def test_Merge_NoCommonKeys_ReturnDictWithValuesFromBoth(self):
+        dict1 = self.from_flat({
+            (1, 'A'): 12,
+            (2, 'B'): 34,
+        })
+
+        dict2 = self.from_flat({
+            (1, 'B'): 13,
+            (2, 'A'): 25,
+        })
+
+        actual = dict1.merge(dict2)
+
+        self.assertEqual(4, len(actual))
+        self.assertEqual(25, actual[2, 'A'])
+
+    def test_Merge_WithCommonKeys_ReturnReplaceValueFromSecondDict(self):
+        dict1 = self.from_flat({
+            (1, 'A'): 12,
+            (1, 'B'): 34,
+        })
+
+        dict2 = self.from_flat({
+            (1, 'B'): 13,
+            (2, 'A'): 25,
+        })
+
+        actual = dict1.merge(dict2)
+
+        self.assertEqual(3, len(actual))
+        self.assertEqual(13, actual[1, 'B'])
+
     create = staticmethod(dicttools.multidimensional.MultiDict)
     from_flat = staticmethod(dicttools.multidimensional.MultiDict.from_flat)
 
