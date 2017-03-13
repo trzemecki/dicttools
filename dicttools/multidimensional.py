@@ -1,4 +1,5 @@
 import six.moves
+from .functions import map_values
 
 
 class MultiDict(object):
@@ -147,6 +148,9 @@ class MultiDict(object):
     def copy(self):
         return MultiDict(self._items, self._headers)
 
+    def map_values(self, function):
+        return MultiDict(map_values(function, self._items), self._headers)
+
     def to_nested(self):
         def add(dictionary, key, value):
             if len(key) == 1:
@@ -287,6 +291,9 @@ class NamedMultiDict(MultiDict, _NamedMixin):
     def __init__(self, data=None, headers=None, names=None):
         super(NamedMultiDict, self).__init__(data, headers)
         self._names = names
+
+    def map_values(self, function):
+        return NamedMultiDict(map_values(function, self._items), self._headers, self._names)
 
     def copy(self):
         return NamedMultiDict(self._items, self._headers, self._names)

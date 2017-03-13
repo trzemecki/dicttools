@@ -223,6 +223,16 @@ class MultiDictTest(unittest.TestCase):
         self.assertEqual(3, len(actual))
         self.assertEqual(13, actual[1, 'B'])
 
+    def test_MapValues_Always_ReturnNewDictWithModifiedValues(self):
+        instance = self.create([
+            [12, 13, 14],
+            [25, 34, 35],
+        ], headers=[[1, 2], ['A', 'B', 'C']])
+
+        actual = instance.map_values(lambda v: v % 10)
+
+        self.assertEqual(4, actual[2]['B'])
+
     create = staticmethod(dicttools.multidimensional.MultiDict)
     from_flat = staticmethod(dicttools.multidimensional.MultiDict.from_flat)
 
@@ -272,6 +282,14 @@ class NamedMultiDictTest(unittest.TestCase):
 
         self.assertIsInstance(actual, dicttools.multidimensional.NamedMultiDict)
 
-    @staticmethod
-    def create(*args, **kwargs):
-        return dicttools.multidimensional.NamedMultiDict(*args, **kwargs)
+    def test_MapValues_Always_ReturnNewDictWithModifiedValues(self):
+        instance = self.create([
+            [12, 13, 14],
+            [25, 34, 35],
+        ], headers=[[1, 2], ['A', 'B', 'C']], names=['row', 'column'])
+
+        actual = instance.map_values(lambda v: v % 10)
+
+        self.assertEqual(4, actual.get(row=2, column='B'))
+
+    create = staticmethod(dicttools.multidimensional.NamedMultiDict)
