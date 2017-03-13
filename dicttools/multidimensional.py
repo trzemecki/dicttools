@@ -50,6 +50,15 @@ class MultiDict(object):
     def __len__(self):
         return len(self._items)
 
+    def __contains__(self, key):
+        if not isinstance(key, tuple):
+            key = (key,)
+
+        try:
+            return self.key_index(key) in self._items
+        except KeyError:
+            return False
+
     def __getitem__(self, key):
         if not isinstance(key, tuple):
             key = (key,)
@@ -281,7 +290,7 @@ class _NamedMixin(object):
         result = []
 
         for name, token in zip(self._names, key):
-            if isinstance(token, slice):
+            if isinstance(token, (slice, list)):
                 result.append(name)
 
         return tuple(result)

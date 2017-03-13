@@ -66,6 +66,22 @@ class MultiDictTest(unittest.TestCase):
         self.assertEqual(2, len(actual))
         self.assertEqual(14, actual['C'])
 
+    def test_Contains_KeyInDict_ReturnTrue(self):
+        instance = self.create([
+            [12, 13, 14],
+            [25, 34, 35],
+        ], headers=[[1, 2], ['A', 'B', 'C']])
+
+        self.assertIn((1, 'A'), instance)
+
+    def test_Contains_KeyNotInDict_ReturnFalse(self):
+        instance = self.create([
+            [12, 13, 14],
+            [25, 34, 35],
+        ], headers=[[1, 2], ['A', 'B', 'C']])
+
+        self.assertNotIn((3, 'A'), instance)
+
     def test_Shape_DictHasValues_ReturnTupleWithDimensions(self):
         instance = self.create([
             [12, 13],
@@ -281,6 +297,18 @@ class NamedMultiDictTest(unittest.TestCase):
         actual = instance.get(column='B').reduce()
 
         self.assertIsInstance(actual, dicttools.multidimensional.NamedMultiDict)
+
+    def test_Reduce_ListInKey_SustainNamesInResult(self):
+        instance = self.create([
+            [12, 13],
+            [25, 34],
+            [56, 89],
+        ], [[1, 2, 3], ['A', 'B']], ['row', 'column'])
+
+        reduced = instance.get(row=[1, 3]).reduce()
+
+        actual = reduced.get(row=1, column='B')
+        self.assertEqual(13, actual)
 
     def test_MapValues_Always_ReturnNewDictWithModifiedValues(self):
         instance = self.create([
