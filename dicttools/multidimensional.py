@@ -11,7 +11,7 @@ class MultiDict(object):
         return result
 
     def __init__(self, data=None, headers=None):
-        self._headers = None if headers is None else [list(each) for each in headers]
+        self._headers = None if headers is None else list(map(list, headers))
 
         self._items = {}
 
@@ -54,12 +54,12 @@ class MultiDict(object):
             key += (slice(None),) * (self.size - len(key))
 
         if not any(isinstance(token, slice) for token in key):
-            return self._items[self._key_index(key)]
+            return self._items[self.key_index(key)]
         else:
             return _MultiDictView(self, key)
 
     def reduce(self, index):
-        index = self._key_index(index)
+        index = self.key_index(index)
         return MultiDict(dict(self._reduce_keys(index)), list(self._reduce_headers(index)))
 
     def _reduce_keys(self, request_index):
@@ -86,7 +86,7 @@ class MultiDict(object):
             key = (key,)
 
         self._init_headers(len(key))
-        index = self._key_index(key, insert=True)
+        index = self.key_index(key, insert=True)
 
         self._items[index] = value
 
@@ -102,15 +102,12 @@ class MultiDict(object):
         elif len(self._headers) != count:
             raise KeyError('Wrong size %d, expected %d' % (count, len(self._headers)))
 
-    def _key_index(self, key, insert=False):
+    def key_index(self, key, insert=False):
         return tuple(
-            self._token_index(token, axis, insert) for axis, token in enumerate(key)
+            self.token_index(token, axis, insert) for axis, token in enumerate(key)
         )
 
-    def token_to_index(self, token, axis):
-        return self._token_index(token, axis)
-
-    def _token_index(self, token, axis, insert=False):
+    def token_index(self, token, axis, insert=False):
         headers = self._headers[axis]
 
         if isinstance(token, slice):
@@ -219,14 +216,14 @@ class _MultiDictView(_DictView):
         return tuple(result)
 
     def _check_contains(self, axis, item, other_key, reduced_item):
-        indices = self._source.token_to_index(item, axis)
+        indices = self._source.token_index(item, axis)
         if isinstance(reduced_item, slice):
-            reduced_indices = set(self._source.token_to_index(reduced_item, axis))
+            reduced_indices = set(self._source.token_index(reduced_item, axis))
 
             if set(indices) | reduced_indices != reduced_indices:
                 raise KeyError(other_key)
 
-        elif self._source.token_to_index(reduced_item, axis) not in indices:
+        elif self._source.token_index(reduced_item, axis) not in indices:
             raise KeyError(other_key)
 
 
