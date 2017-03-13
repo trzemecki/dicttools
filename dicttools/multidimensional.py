@@ -56,7 +56,7 @@ class MultiDict(object):
         if len(key) < self.size:
             key += (slice(None),) * (self.size - len(key))
 
-        if not any(isinstance(token, slice) for token in key):
+        if not any(isinstance(token, (slice, list)) for token in key):
             return self._items[self.key_index(key)]
         else:
             return _MultiDictView(self, key)
@@ -119,7 +119,13 @@ class MultiDict(object):
             step = 1 if token.step is None else token.step
 
             return list(six.moves.range(start, stop, step))
+        elif isinstance(token, list):
+            return [self._single_token_index(each, headers, insert) for each in token]
+        else:
+            return self._single_token_index(token, headers, insert)
 
+    @staticmethod
+    def _single_token_index(token, headers, insert):
         try:
             return headers.index(token)
         except ValueError:
@@ -185,6 +191,9 @@ class _DictView(object):
 
         return False
 
+    def __len__(self):
+        return len(self.reduce())
+
     def __repr__(self):
         return repr(self.reduce())
 
@@ -216,7 +225,7 @@ class _MultiDictView(_DictView):
 
         iter_keys = iter(other_key)
         for axis, item in enumerate(self._key):
-            if isinstance(item, slice):
+            if isinstance(item, (slice, list)):
                 try:
                     reduced_item = next(iter_keys)
                     self._check_contains(axis, item, other_key, reduced_item)

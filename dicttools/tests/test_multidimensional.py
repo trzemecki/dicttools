@@ -55,6 +55,17 @@ class MultiDictTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             actual = view['C']
 
+    def test_GetItem_ListInKey_ReturnItemsFromList(self):
+        instance = self.create([
+            [12, 13, 14],
+            [25, 34, 35],
+        ], headers=[[1, 2], ['A', 'B', 'C']])
+
+        actual = instance[1, ['A', 'C']]
+
+        self.assertEqual(2, len(actual))
+        self.assertEqual(14, actual['C'])
+
     def test_Shape_DictHasValues_ReturnTupleWithDimensions(self):
         instance = self.create([
             [12, 13],
