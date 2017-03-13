@@ -227,7 +227,7 @@ class MultiDictTest(unittest.TestCase):
     from_flat = staticmethod(dicttools.multidimensional.MultiDict.from_flat)
 
 
-class NamedMultiDict(unittest.TestCase):
+class NamedMultiDictTest(unittest.TestCase):
     def test_Get_GiveAllKeys_ReturnAssignedValue(self):
         instance = self.create([
             [12, 13],
@@ -260,6 +260,17 @@ class NamedMultiDict(unittest.TestCase):
         actual = instance.get(column='B').get(row=2)
 
         self.assertEqual(34, actual)
+
+    def test_Reduce_View_ReturnNamedDict(self):
+        instance = self.create([
+            [12, 13],
+            [25, 34],
+            [56, 89],
+        ], [[1, 2, 3], ['A', 'B']], ['row', 'column'])
+
+        actual = instance.get(column='B').reduce()
+
+        self.assertIsInstance(actual, dicttools.multidimensional.NamedMultiDict)
 
     @staticmethod
     def create(*args, **kwargs):

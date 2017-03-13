@@ -307,4 +307,5 @@ class _NamedMultiDictViewDecorator(_DictView, _NamedMixin):
         return self.reduce().items()
 
     def reduce(self, key=None):
-        return self._view.reduce(key)
+        result = self._view.reduce(key)
+        return NamedMultiDict(result._items, result._headers, self._names)
