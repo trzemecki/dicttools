@@ -227,18 +227,11 @@ class _MultiDictView(_DictView):
             raise KeyError(other_key)
 
 
-class NamedMultiDict(MultiDict):
-    def __init__(self, data=None, headers=None, names=None):
-        super(NamedMultiDict, self).__init__(data, headers)
-        self._names = names
+class _NamedMixin(object):
+    _names = ()
 
-    def _keywords_to_key(self, kwargs):
-        key = []
-
-        for name in self._names:
-            key.append(kwargs.pop(name, slice(None)))
-
-        return tuple(key)
+    def __getitem__(self, item):
+        raise NotImplementedError
 
     def get(self, **kwargs):
         key = self._keywords_to_key(kwargs)
@@ -248,6 +241,14 @@ class NamedMultiDict(MultiDict):
             return _NamedMultiDictViewDecorator(result, self._reduce_names(key))
 
         return result
+
+    def _keywords_to_key(self, kwargs):
+        key = []
+
+        for name in self._names:
+            key.append(kwargs.pop(name, slice(None)))
+
+        return tuple(key)
 
     def _reduce_names(self, key):
         result = []
@@ -259,7 +260,13 @@ class NamedMultiDict(MultiDict):
         return tuple(result)
 
 
-class _NamedMultiDictViewDecorator(_DictView):
+class NamedMultiDict(MultiDict, _NamedMixin):
+    def __init__(self, data=None, headers=None, names=None):
+        super(NamedMultiDict, self).__init__(data, headers)
+        self._names = names
+
+
+class _NamedMultiDictViewDecorator(_DictView, _NamedMixin):
     def __init__(self, view, names):
         self._view = view
         self._names = names
@@ -275,29 +282,3 @@ class _NamedMultiDictViewDecorator(_DictView):
 
     def reduce(self, key=None):
         return self._view.reduce(key)
-
-    def _keywords_to_key(self, kwargs):
-        key = []
-
-        for name in self._names:
-            key.append(kwargs.pop(name, slice(None)))
-
-        return tuple(key)
-
-    def _reduce_names(self, key):
-        result = []
-
-        for name, token in zip(self._names, key):
-            if isinstance(token, slice):
-                result.append(name)
-
-        return tuple(result)
-
-    def get(self, **kwargs):
-        key = self._keywords_to_key(kwargs)
-        result = self[key]
-
-        if isinstance(result, _DictView):
-            return _NamedMultiDictViewDecorator(self, self._reduce_names(key))
-
-        return result
