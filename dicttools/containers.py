@@ -179,6 +179,25 @@ class TwoWayDict(collections.MutableMapping):
         >>> container[3] = 'c'
         >>> container['c']
         3
+
+    Both entries of association are automatically updated when one key is changed
+
+        >>> container  = TwoWayDict()
+        >>> container
+        TwoWayDict({})
+        >>> container ['c'] = 3
+        >>> container
+        TwoWayDict({'c': 3})
+        >>> container [3]
+        'c'
+        >>> container [4] = 'c'
+        >>> container
+        TwoWayDict({4: 'c'})
+        >>> container ['c']
+        4
+        >>> container [4]
+        'c'
+
     """
 
     def __init__(self, *args, **kwargs):
