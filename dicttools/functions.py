@@ -343,3 +343,21 @@ def stringify(d: dict)->str:
     for k,v in d.items():
         d2[k]=stringify(v) if isinstance(v, dict) else v
     return "{" + ", ".join(["{}:{}".format(k,v) for k,v in sorted(d2.items())]) + "}"
+
+
+def list_of_values(dictionary:dict, list_of_keys:list, default=None)->list:
+    """
+    Converts a dict to a list of its values,
+    with the default value inserted for each missing key::
+
+        >>> list_of_values({"a":1, "b":2, "d":4}, ["d","c","b","a"])
+        [4, None, 2, 1]
+
+        >>> list_of_values({"a":1, "b":2, "d":4}, ["d","c","b","a"], default=0)
+        [4, 0, 2, 1]
+
+    """
+    result = []
+    for key in list_of_keys:
+        result.append(dictionary.get(key,default))
+    return result

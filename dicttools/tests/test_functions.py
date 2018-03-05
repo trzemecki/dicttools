@@ -256,3 +256,13 @@ class DictToolsTests(unittest.TestCase):
         expected = "{a:1, b:{a:5, d:4}, c:3}"
         self.assertEqual(expected, actual)
 
+    def test_ListOfValues_WorksWithoutDefault(self):
+        actual = dicttools.list_of_values({"a":1, "b":2, "d":4}, ["d","c","b","a"])
+        expected = [4, None, 2, 1]
+        self.assertEqual(expected, actual)
+
+    def test_ListOfValues_WorksWithDefault(self):
+        actual = dicttools.list_of_values({"a":1, "b":2, "d":4}, ["d","c","b","a"], default=0)
+        expected = [4, 0, 2, 1]
+        self.assertEqual(expected, actual)
+
