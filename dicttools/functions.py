@@ -6,8 +6,8 @@ import inspect
 
 def two_way(dictionary):
     """
-    Create new dict contains two way associated (values to keys and keys to values)
-    items from given dict, for example::
+    Create a new dict containing two-way associations (values to keys and keys to values)
+    from the given dictionary::
 
         >>> two_way({'A': 1, 'B': 2})
         {'A': 1, 1: 'A', 2: 'B', 'B': 2}
@@ -15,13 +15,12 @@ def two_way(dictionary):
     :param dict dictionary: one way association dict
     :return: two way association dict
     """
-
     return merge(swap(dictionary), dictionary)
 
 
 def swap(dictionary):
     """
-    Create new dict with given dictionary keys as values and values as keys::
+    Create a new dict with the given dictionary keys as values and values as keys::
 
         >>> swap({0: 'A', 1: 'B', 2: 'C'})
         {'A': 0, 'C': 2, 'B': 1}
@@ -35,14 +34,17 @@ def swap(dictionary):
 
 def by(key, *elements):
     """
-    Create dict contained elements, which could be accessed by
-    extracted key, as given as parameter::
+    Create a new dict with the given elements as values,
+    and the keys determined by the given parameter function::
 
         >>> by('real', (1+2j), (2-3j),(-5+0j))
         {1.0: (1+2j), 2.0: (2-3j), -5.0: (-5+0j)}
 
         >>> by('imag', [(1+2j), (2-3j),(-5+0j)])
         {0.0: (-5+0j), 2.0: (1+2j), -3.0: (2-3j)}
+
+        >>> by(lambda x:int(x), "123", "456")
+        {456: '456', 123: '123'}
 
 
     :param elements: iterable of elements or elements as varargs
@@ -58,10 +60,10 @@ def by(key, *elements):
 
 def group_by(key, *elements):
     """
-    Create dict contained elements, grouped by given key.
-    Return dict of list of values, with the same extracted key assigned to this key::
+    Create a new dict containing elements grouped by the given key.
+    Returns a dict of list of values, with the same extracted key assigned to this key::
 
-        >>> group_by('real', 2j, -3j, (-5+0j), (-3+2j), (-5+15j))
+        >>> group_by('real', 2j, 0-3j, (-5+0j), (-3+2j), (-5+15j))
         {0.0: [2j, -3j], -5.0: [(-5+0j), (-5+15j)], -3.0: [(-3+2j)]}
 
     :param elements: list or tuple of elements
@@ -80,24 +82,24 @@ def group_by(key, *elements):
     return dict(result)
 
 
-def select(source, *elements):
+def select(source, *keys):
     """
-    Select from mapping given values and put into new created dict::
+    Create a new dict containing only the selected keys from the source dictionary.
 
         >>> select({'a': 1, 'b': 2, 'c':4}, 'a', 'c')
         {'a': 1, 'c': 4}
 
     :param source: mapping, from which values are selected
-    :param elements: values which should be selected
+    :param keys: keys which should be selected
     :return: dict with selected values
     """
 
-    return extract(source, *elements, key=operator.getitem)
+    return extract(source, *keys, key=operator.getitem)
 
 
 def extract(source, *elements, **kwargs):
     """
-    Create dict with attributes name and associated value extracted from object,
+    Create a new dict with attributes name and associated value extracted from object,
     by keys given as parameter.
 
     :param source: object to extract
@@ -122,14 +124,18 @@ def _iter_all_or_first(elements):
 
 def merge(*dicts):
     """
-    Merge dicts into single dict. If keys are duplicated, value is taken from last dict,
-    which contains this key::
+    Merge the given dicts into a single new dict.
+    If the same key is found in two or more dicts, the value is taken from last dict
+    containing this key::
 
         >>> merge({'A': 1}, {'B': 2}, {'C': 3})
         {'A': 1, 'C': 3, 'B': 2}
 
+        >>> merge({'A': 1}, {'B': 2}, {'A': 3})
+        {'A': 3, 'B': 2}
+
     :param dicts: dicts to merge
-    :return: dict contained all element from given dicts
+    :return: dict containing all element from given dicts
     """
 
     def update(result, item):
@@ -142,17 +148,17 @@ def merge(*dicts):
 
 def split(dictionary, *conditions, **kwargs):
     """
-    Split elements to other sets of elements according to given conditions, for example::
+    Split the dictionary to sub-dictionaries based on conditions operated on the keys::
 
-        >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%2 == 0))
-        [{0: 'A', 2: 'C', 4: 'E'}, {1: 'B', 3: 'D'}]
+        >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%3 == 0, lambda i: i%3 == 1))
+        [{0: 'A', 3: 'D'}, {1: 'B', 4: 'E'}, {2: 'C'}]
 
-    When the elements which are not follow any given condition should be omitted set rest attribute to False::
+    When the elements which do not follow any given condition should be omitted, set rest attribute to False::
 
-        >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%2 == 0, rest=False))
-        [{0: 'A', 2: 'C', 4: 'E'}]
+        >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%3 == 0, lambda i: i%3 == 1, rest=False))
+        [{0: 'A', 3: 'D'}, {1: 'B', 4: 'E'}]
 
-    When more than one condition is given element was included in first dictionary, which for condition
+    When more than one condition is given, each element is included in the first dictionary for which the condition
     was fulfilled::
 
         >>> list(split({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%3 == 0, lambda i: i%2 == 0))
@@ -190,13 +196,19 @@ def _split_two(dictionary, condition):
 
 def sift(dictionary, condition, opposite=False):
     """
-    Select elements from dictionary, which fulfilled given condition
+    Select from dictionary only the keys for which the condition is True.
+
+        >>> sift({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%3 == 0)
+        {0: 'A', 3: 'D'}
+
+        >>> sift({0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}, lambda i: i%3 == 0, opposite=True)
+        {1: 'B', 2: 'C', 4: 'E'}
 
     :param dictionary: set of elements to select subset
     :param condition: function (name matters): key -> bool or  value -> bool or key, value -> bool)
         selected remain elements
     :param opposite: if True replace "condition" by "not condition" (default False)
-    :return: subset of elements which fulfilled given condition
+    :return: subset of elements which fulfilled given condition.
     """
 
     selector = _selector(condition)
@@ -206,7 +218,7 @@ def sift(dictionary, condition, opposite=False):
 
 def sift_update(dictionary, condition, opposite=False):
     """
-    Works like sift_, but modify given dict in place.
+    Works like sift, but modifies the given dictionary in place.
 
     :param dictionary: set of elements to select subset
     :param condition: function (name matters): key -> bool or  value -> bool or key, value -> bool)
@@ -236,7 +248,13 @@ def _selector(condition):
 def contains(sub, super):
     """
     Non-recursive.
-    Check if sub dict is included in super dict (both keys and values are equal).
+    Check if sub dict is included in super dict (both keys and values are equal)::
+
+        >>> contains({0: 'A', 1: 'B'}, {0: 'A', 1: 'B', 2: 'C'})
+        True
+
+        >>> contains({0: 'A', 1: 'B', 2: 'C'}, {0: 'A', 1: 'B'})
+        False
 
     :param dict sub: the dict, which should be included in super dict
     :param dict super: the dict, which should include all elements from sub dict
@@ -250,7 +268,7 @@ def contains(sub, super):
 
 def map_values(function, dictionary):
     """
-    Map each value using given function, and return new dict with changed values.
+    Transform each value using the given function. Return a new dict with transformed values.
 
     :param function: keys map function
     :param dictionary: dictionary to mapping
@@ -262,7 +280,7 @@ def map_values(function, dictionary):
 
 def map_keys(function, dictionary):
     """
-    Map each key using given function, and return new dict with changed keys.
+    Transform each key using the given function. Return a new dict with transformed keys.
 
     :param function: values map function
     :param dictionary: dictionary to mapping
@@ -274,8 +292,9 @@ def map_keys(function, dictionary):
 
 def find_key(value, dictionary, default=None):
     """
-    Function find key in dict for given value. If not found return default value (None or given).
-    If many elements can be found return one of it (first founded)::
+    Find the given value in the given dictionary and returns its key.
+    If value is not found - return default value (None or given).
+    If many elements can be found - return one of them arbitrarily (the first one found)::
 
         >>> find_key('d', {'a': 'b', 'c': 'd'})
         'c'
@@ -298,7 +317,7 @@ def find_key(value, dictionary, default=None):
 
 def fill_value(keys, value):
     """
-    Function return dict with given value assigned to each given key.
+    Return a dict with the given value assigned to each given key.
 
         >>> fill_value([1, 2, 3], 'a')
         {1: 'a', 2: 'a', 3: 'a'}
