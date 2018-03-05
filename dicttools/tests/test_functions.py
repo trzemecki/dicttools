@@ -243,3 +243,16 @@ class DictToolsTests(unittest.TestCase):
             'alpha': 'val', 'beta': 'val', 'gamma': 'val'
         }
         self.assertEqual(expected, actual)
+
+    def test_Stringify_WorksForSingleLevelDict(self):
+        d = {"a":1,"c":3,"b":2}
+        actual = dicttools.stringify(d)
+        expected = "{a:1, b:2, c:3}"
+        self.assertEqual(expected, actual)
+
+    def test_Stringify_WorksForTwoLevelDict(self):
+        d = {"a":1,"c":3,"b":{"d":4,"a":5}}
+        actual = dicttools.stringify(d)
+        expected = "{a:1, b:{a:5, d:4}, c:3}"
+        self.assertEqual(expected, actual)
+
