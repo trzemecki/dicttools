@@ -147,14 +147,14 @@ def merge(*dicts):
     :param dicts: dicts to merge
     :return: dict containing all element from given dicts
     """
-    if len(dicts)==0:
+    if len(dicts) == 0:
         return {}
 
     if callable(dicts[0]):
         mergefunc = dicts[0]
         dicts = dicts[1:]
     else:
-        mergefunc = lambda x,y: y  # take the last item
+        mergefunc = lambda x, y: y  # take the last item
 
     def update(result, item):
         if item is not None:
@@ -348,8 +348,7 @@ def fill_value(keys, value):
     return {key: value for key in keys}
 
 
-
-def stringify(d: dict)->str:
+def stringify(d):
     """
     Returns a canonical string representation of the given dict,
     by sorting its items recursively.
@@ -358,13 +357,15 @@ def stringify(d: dict)->str:
         >>> stringify({"a":1,"b":2,"c":{"d":3,"e":4}})
         '{a:1, b:2, c:{d:3, e:4}}'
     """
-    d2 = dict()
-    for k,v in d.items():
-        d2[k]=stringify(v) if isinstance(v, dict) else v
-    return "{" + ", ".join(["{}:{}".format(k,v) for k,v in sorted(d2.items())]) + "}"
+    d2 = {}
+
+    for k, v in d.items():
+        d2[k] = stringify(v) if isinstance(v, dict) else v
+
+    return "{" + ", ".join(["{}:{}".format(k, v) for k, v in sorted(d2.items())]) + "}"
 
 
-def list_of_values(dictionary:dict, list_of_keys:list, default=None)->list:
+def list_of_values(dictionary, list_of_keys, default=None):
     """
     Converts a dict to a list of its values,
     with the default value inserted for each missing key::
@@ -377,6 +378,8 @@ def list_of_values(dictionary:dict, list_of_keys:list, default=None)->list:
 
     """
     result = []
+
     for key in list_of_keys:
-        result.append(dictionary.get(key,default))
+        result.append(dictionary.get(key, default))
+
     return result

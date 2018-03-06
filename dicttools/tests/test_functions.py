@@ -31,24 +31,34 @@ class DictToolsTests(unittest.TestCase):
 
         self.assertEqual(12, result['X'])
 
-    def test_Merge_KeyRepeats_MergeFuncGiven_ReturnDictWithMergedValues(self):
-        result = dicttools.merge(lambda x,y:x+y, {'A': 1, 'X': 8}, {'B': 2, 'X': 14}, {'C': 3, 'X': 12})
+    def test_Merge_KeyRepeats_MergeFuncIsSum_ReturnDictWithAddedDuplicatedValues(self):
+        result = dicttools.merge(lambda x, y: x + y, {'A': 1, 'X': 8}, {'B': 2, 'X': 14}, {'C': 3, 'X': 12})
+
         self.assertEqual(34, result['X'])
-        result = dicttools.merge(lambda x,y:x-y, {'A': 1, 'X': 8}, {'B': 2, 'X': 14}, {'C': 3, 'X': 12})
+
+    def test_Merge_KeyRepeats_MergeFuncIsDifference_ReturnDictWithValuesSubtractedValues(self):
+        result = dicttools.merge(lambda x, y: x - y, {'A': 1, 'X': 8}, {'B': 2, 'X': 14}, {'C': 3, 'X': 12})
+
         self.assertEqual(-18, result['X'])
 
-    def test_Merge_NoneGiven_IgnoreNones(self):
+    def test_Merge_NoneGivenAsThridArgument_IgnoreNones(self):
         result = dicttools.merge({'A': 1}, {'B': 2}, None, {'C': 3})
+
         self.assertEqual({'A', 'B', 'C'}, set(result))
 
+    def test_Merge_NoneGivenAsFirstArgument_IgnoreNones(self):
         result = dicttools.merge(None, {'A': 1}, {'B': 2}, {'C': 3})
+
         self.assertEqual({'A', 'B', 'C'}, set(result))
 
-    def test_Merge_NoneGiven_MergeFuncGiven_IgnoreNones(self):
-        result = dicttools.merge(lambda x,y:x+y, {'A': 1}, {'B': 2}, None, {'C': 3})
+    def test_Merge_NoneGiven_MergeFuncGivenAndThirdArgumentIsNone_IgnoreNones(self):
+        result = dicttools.merge(lambda x, y: x + y, {'A': 1}, {'B': 2}, None, {'C': 3})
+
         self.assertEqual({'A', 'B', 'C'}, set(result))
 
-        result = dicttools.merge(lambda x,y:x+y, None, {'A': 1}, {'B': 2}, {'C': 3})
+    def test_Merge_NoneGiven_MergeFuncGivenAndFirstArgumentIsNone_IgnoreNones(self):
+        result = dicttools.merge(lambda x, y: x + y, None, {'A': 1}, {'B': 2}, {'C': 3})
+
         self.assertEqual({'A', 'B', 'C'}, set(result))
 
     def test_Merge_OnlyNonesGiven_ReturnEmptyDict(self):
@@ -58,8 +68,10 @@ class DictToolsTests(unittest.TestCase):
 
     def test_Merge_NestedDicts(self):
         mydicts = [{"a": {"x": 1, "y": 2}, "b": {"x": 1, "z": 3}}, {"a": {"x": 1, "y": 5}, "c": {"x": 1, "z": 3}}]
-        actual = dicttools.merge(lambda d1, d2: dicttools.merge(lambda x,y:x+y, d1, d2), *mydicts)
-        expected = {"a":{"x":2, "y":7}, "b":{"x":1, "z":3}, "c":{"x":1, "z":3}}
+
+        actual = dicttools.merge(lambda d1, d2: dicttools.merge(lambda x, y: x + y, d1, d2), *mydicts)
+        expected = {"a": {"x": 2, "y": 7}, "b": {"x": 1, "z": 3}, "c": {"x": 1, "z": 3}}
+
         self.assertEqual(expected, actual)
 
     def test_ByKey_Always_ReturnDictWithValuesAssignedToExtractedKey(self):
@@ -194,7 +206,7 @@ class DictToolsTests(unittest.TestCase):
         result = dicttools.group_by('sort', values)
 
         with self.assertRaises(KeyError):
-            value = result['3']
+            _ = result['3']
 
     def test_Extract_KeyNotGiven_ReturnDictWithAttributes(self):
         source = mock.Mock(first=1, second=2, third=3)
@@ -212,11 +224,11 @@ class DictToolsTests(unittest.TestCase):
         self.assertEqual({'h': 2, 'a': 3, 'l': 4}, result)
 
     def test_Select_Always_GetFromDictGivenItems(self):
-        source = {'a': 1, 'b': 2, 'c':4}
+        source = {'a': 1, 'b': 2, 'c': 4}
 
         result = dicttools.select(source, 'a', 'c')
 
-        self.assertEqual({'a': 1, 'c':4}, result)
+        self.assertEqual({'a': 1, 'c': 4}, result)
 
     def test_MapValues_Always_ReturnValuesWithTheSameKeysAndMappedValues(self):
         source = {'a': 1, 'b': 2, 'c': 4}
@@ -268,25 +280,27 @@ class DictToolsTests(unittest.TestCase):
         }
         self.assertEqual(expected, actual)
 
-    def test_Stringify_WorksForSingleLevelDict(self):
-        d = {"a":1,"c":3,"b":2}
+    def test_Stringify_SingleLevelDict_ReturnSortedKeysWithValues(self):
+        d = {"a": 1, "c": 3, "b": 2}
         actual = dicttools.stringify(d)
         expected = "{a:1, b:2, c:3}"
         self.assertEqual(expected, actual)
 
-    def test_Stringify_WorksForTwoLevelDict(self):
-        d = {"a":1,"c":3,"b":{"d":4,"a":5}}
+    def test_Stringify_DoubleNestedDict_CallRecursive(self):
+        d = {"a": 1, "c": 3, "b": {"d": 4, "a": 5}}
         actual = dicttools.stringify(d)
         expected = "{a:1, b:{a:5, d:4}, c:3}"
+
         self.assertEqual(expected, actual)
 
-    def test_ListOfValues_WorksWithoutDefault(self):
-        actual = dicttools.list_of_values({"a":1, "b":2, "d":4}, ["d","c","b","a"])
+    def test_ListOfValues_WithoutDefault_ReturnNoneForMissedValues(self):
+        actual = dicttools.list_of_values({"a": 1, "b": 2, "d": 4}, ["d", "c", "b", "a"])
         expected = [4, None, 2, 1]
+
         self.assertEqual(expected, actual)
 
-    def test_ListOfValues_WorksWithDefault(self):
-        actual = dicttools.list_of_values({"a":1, "b":2, "d":4}, ["d","c","b","a"], default=0)
+    def test_ListOfValues_DefaultGiven_ReturnDefaultValueForMissedValues(self):
+        actual = dicttools.list_of_values({"a": 1, "b": 2, "d": 4}, ["d", "c", "b", "a"], default=0)
         expected = [4, 0, 2, 1]
-        self.assertEqual(expected, actual)
 
+        self.assertEqual(expected, actual)
