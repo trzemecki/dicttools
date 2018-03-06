@@ -18,3 +18,5 @@ Module functions
 .. autofunction:: dicttools.map_keys
 .. autofunction:: dicttools.find_key
 .. autofunction:: dicttools.fill_value
+.. autofunction:: dicttools.stringify
+.. autofunction:: dicttools.list_of_values
