@@ -2,7 +2,10 @@ from __future__ import absolute_import
 
 import unittest
 
-from unittest import mock
+try:
+    import mock
+except ImportError:
+    from unittest import mock
 
 import dicttools
 
