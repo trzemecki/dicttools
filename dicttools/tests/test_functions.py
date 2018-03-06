@@ -31,15 +31,36 @@ class DictToolsTests(unittest.TestCase):
 
         self.assertEqual(12, result['X'])
 
+    def test_Merge_KeyRepeats_MergeFuncGiven_ReturnDictWithMergedValues(self):
+        result = dicttools.merge(lambda x,y:x+y, {'A': 1, 'X': 8}, {'B': 2, 'X': 14}, {'C': 3, 'X': 12})
+        self.assertEqual(34, result['X'])
+        result = dicttools.merge(lambda x,y:x-y, {'A': 1, 'X': 8}, {'B': 2, 'X': 14}, {'C': 3, 'X': 12})
+        self.assertEqual(-18, result['X'])
+
     def test_Merge_NoneGiven_IgnoreNones(self):
         result = dicttools.merge({'A': 1}, {'B': 2}, None, {'C': 3})
+        self.assertEqual({'A', 'B', 'C'}, set(result))
 
+        result = dicttools.merge(None, {'A': 1}, {'B': 2}, {'C': 3})
+        self.assertEqual({'A', 'B', 'C'}, set(result))
+
+    def test_Merge_NoneGiven_MergeFuncGiven_IgnoreNones(self):
+        result = dicttools.merge(lambda x,y:x+y, {'A': 1}, {'B': 2}, None, {'C': 3})
+        self.assertEqual({'A', 'B', 'C'}, set(result))
+
+        result = dicttools.merge(lambda x,y:x+y, None, {'A': 1}, {'B': 2}, {'C': 3})
         self.assertEqual({'A', 'B', 'C'}, set(result))
 
     def test_Merge_OnlyNonesGiven_ReturnEmptyDict(self):
         result = dicttools.merge(None, None)
 
         self.assertEqual({}, result)
+
+    def test_Merge_NestedDicts(self):
+        mydicts = [{"a": {"x": 1, "y": 2}, "b": {"x": 1, "z": 3}}, {"a": {"x": 1, "y": 5}, "c": {"x": 1, "z": 3}}]
+        actual = dicttools.merge(lambda d1, d2: dicttools.merge(lambda x,y:x+y, d1, d2), *mydicts)
+        expected = {"a":{"x":2, "y":7}, "b":{"x":1, "z":3}, "c":{"x":1, "z":3}}
+        self.assertEqual(expected, actual)
 
     def test_ByKey_Always_ReturnDictWithValuesAssignedToExtractedKey(self):
         values = (mock.Mock(id=3), mock.Mock(id=6))

@@ -124,23 +124,42 @@ def _iter_all_or_first(elements):
 
 def merge(*dicts):
     """
-    Merge the given dicts into a single new dict.
+    Merge the given dicts into a single new dict::
+
+        >>> d = merge({'A': 1}, {'B': 2}, {'C': 3})
+        >>> stringify(d)
+        '{A:1, B:2, C:3}'
+
     If the same key is found in two or more dicts, the value is taken from last dict
     containing this key::
 
-        >>> merge({'A': 1}, {'B': 2}, {'C': 3})
-        {'A': 1, 'C': 3, 'B': 2}
+        >>> d = merge({'A': 1}, {'B': 2}, {'A': 3})
+        >>> stringify(d)
+        '{A:3, B:2}'
 
-        >>> merge({'A': 1}, {'B': 2}, {'A': 3})
-        {'A': 3, 'B': 2}
+
+    If the first argument is a function, it is used to merge duplicate values::
+
+        >>> d = merge(lambda x,y:x+y, {'A': 1}, {'B': 2}, {'A': 3})
+        >>> stringify(d)
+        '{A:4, B:2}'
 
     :param dicts: dicts to merge
     :return: dict containing all element from given dicts
     """
+    if len(dicts)==0:
+        return {}
+
+    if callable(dicts[0]):
+        mergefunc = dicts[0]
+        dicts = dicts[1:]
+    else:
+        mergefunc = lambda x,y: y  # take the last item
 
     def update(result, item):
         if item is not None:
-            result.update(item)
+            for k, v in item.items():
+                result[k] = mergefunc(result[k], v) if k in result else v
         return result
 
     return functools.reduce(update, dicts, dict())
