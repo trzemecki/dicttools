@@ -22,8 +22,8 @@ def swap(dictionary):
     """
     Create a new dict with the given dictionary keys as values and values as keys::
 
-        >>> swap({0: 'A', 1: 'B', 2: 'C'})
-        {'A': 0, 'C': 2, 'B': 1}
+        >>> stringify(swap({0: 'A', 1: 'B', 2: 'C'}))
+        '{A:0, B:1, C:2}'
 
     :param dict dictionary: dict to swap
     :return: new swapped dict
@@ -86,8 +86,8 @@ def select(source, *keys):
     """
     Create a new dict containing only the selected keys from the source dictionary.
 
-        >>> select({'a': 1, 'b': 2, 'c':4}, 'a', 'c')
-        {'a': 1, 'c': 4}
+        >>> stringify(select({'a': 1, 'b': 2, 'c':4}, 'a', 'c'))
+        '{a:1, c:4}'
 
     :param source: mapping, from which values are selected
     :param keys: keys which should be selected
@@ -144,6 +144,22 @@ def merge(*dicts):
         >>> stringify(d)
         '{A:4, B:2}'
 
+    The returned type is of the same type as the first non-None dict in the list::
+
+        >>> d = merge({'A': 1}, {'B': 2}, {'C': 3})
+        >>> type(d)
+        <class 'dict'>
+        >>> from collections import OrderedDict
+        >>> od = OrderedDict()
+        >>> od["A"] = 1
+        >>> d = merge(od, {'B': 2}, {'A': 3})
+        >>> type(d)
+        <class 'collections.OrderedDict'>
+        >>> d = merge(None, od, {'B': 2}, {'A': 3})
+        >>> type(d)
+        <class 'collections.OrderedDict'>
+
+
     :param dicts: dicts to merge
     :return: dict containing all element from given dicts
     """
@@ -155,14 +171,16 @@ def merge(*dicts):
         dicts = dicts[1:]
     else:
         mergefunc = lambda x, y: y  # take the last item
+    dicts = [d for d in dicts if d is not None]
 
     def update(result, item):
-        if item is not None:
-            for k, v in item.items():
-                result[k] = mergefunc(result[k], v) if k in result else v
+        for k, v in item.items():
+            result[k] = mergefunc(result[k], v) if k in result else v
         return result
 
-    return functools.reduce(update, dicts, dict())
+    TypeToReturn = type(dicts[0])
+    return functools.reduce(update, dicts, TypeToReturn())
+
 
 
 def split(dictionary, *conditions, **kwargs):
@@ -383,3 +401,4 @@ def list_of_values(dictionary, list_of_keys, default=None):
         result.append(dictionary.get(key, default))
 
     return result
+
