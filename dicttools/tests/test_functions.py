@@ -8,6 +8,7 @@ except ImportError:
     from unittest import mock
 
 import dicttools
+import collections
 
 
 def is_even(i):
@@ -72,6 +73,16 @@ class DictToolsTests(unittest.TestCase):
         actual = dicttools.merge(lambda d1, d2: dicttools.merge(lambda x, y: x + y, d1, d2), *mydicts)
         expected = {"a": {"x": 2, "y": 7}, "b": {"x": 1, "z": 3}, "c": {"x": 1, "z": 3}}
 
+        self.assertEqual(expected, actual)
+
+    def test_Merge_OrderedDicts_ReturnOrderedDict(self):
+        dict1 = collections.OrderedDict((('a', 1), ('b', 2)))
+        dict2 = collections.OrderedDict((('b', 1), ('c', 2)))
+
+        actual = dicttools.merge(dict1, dict2)
+        expected = collections.OrderedDict((('a', 1), ('b', 1), ('c', 2)))
+
+        self.assertIsInstance(actual, collections.OrderedDict)
         self.assertEqual(expected, actual)
 
     def test_ByKey_Always_ReturnDictWithValuesAssignedToExtractedKey(self):

@@ -169,18 +169,24 @@ def merge(*dicts):
     if callable(dicts[0]):
         mergefunc = dicts[0]
         dicts = dicts[1:]
+
+        def update(result, item):
+            for k, v in item.items():
+                result[k] = mergefunc(result[k], v) if k in result else v
+
+            return result
     else:
-        mergefunc = lambda x, y: y  # take the last item
+        def update(result, item):
+            result.update(item)
+            return result
+
     dicts = [d for d in dicts if d is not None]
 
-    def update(result, item):
-        for k, v in item.items():
-            result[k] = mergefunc(result[k], v) if k in result else v
-        return result
+    if len(dicts) == 0:
+        return {}
 
     TypeToReturn = type(dicts[0])
     return functools.reduce(update, dicts, TypeToReturn())
-
 
 
 def split(dictionary, *conditions, **kwargs):
