@@ -2,8 +2,13 @@ import bisect
 import collections
 import itertools
 
+try:
+    from collections.abc import Mapping, MutableMapping
+except ImportError:
+    from collections import Mapping, MutableMapping
 
-class FrozenDict(collections.Mapping):
+
+class FrozenDict(Mapping):
     """
     Object represents pairs key-value, and works like dict, but cannot be
     modified. Also is hashable  in contrast to builtin dict.
@@ -40,7 +45,7 @@ class FrozenDict(collections.Mapping):
         """
 
         if not kwargs:
-            if len(args) == 1 and isinstance(args[0], collections.Mapping):
+            if len(args) == 1 and isinstance(args[0], Mapping):
                 content = args[0]
             else:
                 content = collections.OrderedDict(*args)
@@ -90,7 +95,7 @@ class FrozenDict(collections.Mapping):
         return FrozenDict(self)
 
 
-class ChainMap(collections.MutableMapping):
+class ChainMap(MutableMapping):
     """
     Object for multiple dicts aggregation for iterate, getting, setting and deleting
     as single dict.
@@ -167,7 +172,7 @@ class ChainMap(collections.MutableMapping):
         return 'ChainMap(' + repr(list(self._maps)) + ')'
 
 
-class TwoWayDict(collections.MutableMapping):
+class TwoWayDict(MutableMapping):
     """
     Object for storing values and keys accessible either by value and by key.
 

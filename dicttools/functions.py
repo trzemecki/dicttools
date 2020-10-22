@@ -3,6 +3,10 @@ import functools
 import operator
 import inspect
 
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 def two_way(dictionary):
     """
@@ -116,7 +120,7 @@ def extract(source, *elements, **kwargs):
 def _iter_all_or_first(elements):
     if len(elements) > 1:
         return iter(elements)
-    elif isinstance(elements[0], collections.Iterable):
+    elif isinstance(elements[0], Iterable):
         return iter(elements[0])
     else:
         return iter([elements[0]])
