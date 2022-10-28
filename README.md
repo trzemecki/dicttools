@@ -7,9 +7,9 @@
 
 ## Installation
 
-If you have not git yet, install it from https://git-scm.com/downloads
+If you have not git yet, first install it from https://git-scm.com/downloads, and then run
 
-    $ pip install git+git://github.com/trzemecki/dicttools.git
+    $ pip install git+https://github.com/trzemecki/dicttools.git
 
 ## Documentation
 
