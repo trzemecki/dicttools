@@ -141,8 +141,10 @@ class ChainMap(MutableMapping):
 
     def __getitem__(self, key):
         for item in self._maps:
-            if key in item:
+            try:
                 return item[key]
+            except KeyError:
+                continue
 
         raise KeyError(key)
 
