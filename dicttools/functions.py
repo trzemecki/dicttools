@@ -8,6 +8,11 @@ try:
 except ImportError:
     from collections import Iterable
 
+try:
+    from inspect import getfullargspec as getargspec
+except ImportError:
+    from inspect import getargspec as getargspec
+
 def two_way(dictionary):
     """
     Create a new dict containing two-way associations (values to keys and keys to values)
@@ -281,7 +286,7 @@ def sift_update(dictionary, condition, opposite=False):
 
 
 def _selector(condition):
-    spec = inspect.getargspec(condition)
+    spec = getargspec(condition)
     ismethod = inspect.ismethod(condition)
 
     if spec.varargs or len(spec.args) - ismethod == 2:

@@ -137,7 +137,7 @@ class ChainMap(MutableMapping):
         self._maps = maps
 
     def __iter__(self):
-        return itertools.chain(*self._maps)
+        return iter(set(itertools.chain(*self._maps)))
 
     def __getitem__(self, key):
         for item in self._maps:
